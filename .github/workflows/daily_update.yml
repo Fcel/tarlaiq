@@ -1,10 +1,10 @@
 name: TarlaIQ Daily Data Update
 
 on:
-  workflow_dispatch: # Manuel çalıştırma butonu
+  workflow_dispatch: # Manuel buton
 
 permissions:
-  contents: write # GitHub ayarlarında verdiğin izni burada aktif ediyoruz
+  contents: write # Yazma izni
 
 jobs:
   update_data:
@@ -13,7 +13,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Tüm geçmişi al ki çakışma olmasın
+          token: ${{ secrets.GITHUB_TOKEN }} # Kendi iç anahtarını kullan
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,11 +34,12 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+          # Dosyayı ekle
           git add tarlaiq_data.json
           
-          # Eğer dosya değişmişse commit et, değişmemişse hata verme geç
-          git commit -m "Kesin Guncelleme: $(date)" || echo "Degisiklik yok"
+          # Değişiklik varsa commit et
+          git commit -m "Zorunlu Guncelleme: $(date)" || echo "Degisiklik yok"
           
-          # Önce uzak sunucudaki (GitHub) hali al, sonra kendi verini zorla üzerine yaz
-          git pull --rebase origin main
+          # BURASI ÇOK KRİTİK: Uzak sunucuyu ezerek gönder
           git push origin main --force
