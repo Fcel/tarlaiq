@@ -2,20 +2,20 @@ name: TarlaIQ Daily Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Her gece 03:00'te çalışır
-  workflow_dispatch: # Manuel çalıştırma butonu
+    - cron: '0 0 * * *' # Her gece Türkiye saatiyle 03:00'te otomatik çalışır
+  workflow_dispatch: # Manuel çalıştırma butonu (Test için)
 
 jobs:
   update_data:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Yazma izni şart
-      
+      contents: write # Dosya yazma izni şart
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Tüm geçmişi çek (Çakışma riskini bitirir)
+          fetch-depth: 0 # Tüm geçmişi çekerek çakışmaları (conflict) önler
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,6 +29,7 @@ jobs:
       - name: Run update script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
+          PYTHONHTTPSVERIFY: "0" # SSL sertifika hatalarını kökten çözer
         run: python updater.py
 
       - name: Commit and Push changes
@@ -36,13 +37,16 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # ÇAKIŞMAYI ÖNLEYEN KRİTİK ADIMLAR:
+          # Çakışmaları önlemek için önce senin manuel değişikliklerini alır
           git fetch origin main
-          git rebase origin/main # Senin yaptığın manuel değişiklikleri robotun verisinin altına ekler
+          git rebase origin/main
           
-          git add tarlaiq_data.json
-          # Eğer veri değişmemişse hata vermeden geçmesi için '|| true' ekledik
-          git commit -m "Otomatik Veri Güncelleme: $(date)" || true
-          
-          # En son halini zorla değil, güvenle gönderir
-          git push origin main
+          # Sadece dosya varsa ekle, yoksa hata verme
+          if [ -f tarlaiq_data.json ]; then
+            git add tarlaiq_data.json
+            git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
+            git push origin main
+          else
+            echo "HATA: tarlaiq_data.json dosyası oluşturulamadı!"
+            exit 1
+          fi
