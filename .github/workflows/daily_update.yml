@@ -8,8 +8,9 @@ on:
 jobs:
   update_data:
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # Robotun toplamda 30 dakika çalışma izni olsun
     permissions:
-      contents: write # Dosya yazma izni şart
+      contents: write
 
     steps:
       - name: Checkout repo
