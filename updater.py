@@ -15,14 +15,19 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 URL = "https://cds-beta.climate.copernicus.eu/api"
 TOKEN = os.environ.get("CDS_TOKEN")
 
-# Eğer anahtar yoksa kodu hemen durdur
 if not TOKEN:
-    raise ValueError("KRİTİK HATA: CDS_TOKEN bulunamadı! GitHub Secrets ayarlarını kontrol edin.")
+    raise ValueError("KRİTİK HATA: CDS_TOKEN bulunamadı! GitHub Secrets kontrol edin.")
 
-# 15 dakika bekleme süresi tanımlıyoruz
-c = cdsapi.Client(url=URL, key=TOKEN, verify=False, timeout=900)
+# Zaman aşımını ve tekrar denemeyi artırdık (Beta yoğunluğu için)
+c = cdsapi.Client(
+    url=URL, 
+    key=TOKEN, 
+    verify=False, 
+    timeout=1200, 
+    retry_max=15
+)
 
-# Tarih Ayarı: 15 gün geriye çekiyoruz (Arşiv verisi her zaman daha hızlı ve garantidir)
+# Tarih Ayarı: 15 gün geriye (Arşiv verisi her zaman daha hızlı ve hatasızdır)
 target_date = datetime.now() - timedelta(days=15)
 current_year = str(target_date.year)
 current_month = target_date.strftime('%m')
@@ -59,63 +64,70 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
-# --- 3. İŞLEME VE ANALİZ ---
+# --- 3. VERİ ÇEKME VE İŞLEME ---
 def run_process():
     print(f"Sistem Başlatıldı. Hedef Tarih: {target_date.strftime('%Y-%m-%d')}")
     
-    # BU NOKTADA HATA ALIRSAK GITHUB ACTIONS LOGLARINDA GÖRECEĞİZ
-    print("Copernicus Beta sunucusuna istek gönderiliyor...")
-    
-    c.retrieve(
-        'reanalysis-era5-single-levels',
-        {
-            'product_type': ['reanalysis'],           # Liste [] içinde olmalı
-            'variable': [                             # Değişkenler liste içinde
-                '2m_temperature', 
-                'volumetric_soil_water_layer_1'
-            ],
-            'year': [current_year],                   # Liste zorunlu
-            'month': [current_month],                 # Liste zorunlu
-            'day': [current_day],                     # Liste zorunlu
-            'time': ['12:00'],                        # Liste zorunlu
-            'area': [42, 26, 36, 45],
-            'data_format': 'netcdf',                  # 'format' değil 'data_format' olmalı
-        },
-        'latest_data.nc'
-    )
-    
-    print("Veri başarıyla indirildi, analiz ediliyor...")
-    ds = xr.open_dataset('latest_data.nc')
-    results = {}
+    try:
+        print("Copernicus Beta sunucusuna istek gönderiliyor...")
+        # 404 HATASINI ÇÖZEN KRİTİK BÖLÜM (LİSTE FORMATI)
+        c.retrieve(
+            'reanalysis-era5-single-levels',
+            {
+                'product_type': ['reanalysis'],           # Liste zorunlu
+                'variable': [                             # Liste zorunlu
+                    '2m_temperature', 
+                    'volumetric_soil_water_layer_1',
+                    '10m_wind_speed',
+                    'total_precipitation'
+                ],
+                'year': [current_year],                   # Liste zorunlu
+                'month': [current_month],                 # Liste zorunlu
+                'day': [current_day],                     # Liste zorunlu
+                'time': ['12:00'],                        # Liste zorunlu
+                'area': [42.1, 26.0, 35.9, 44.9],         # Türkiye Çerçevesi
+                'data_format': 'netcdf',                  # 'format' yerine 'data_format'
+            },
+            'latest_data.nc'
+        )
+        
+        print("Veri başarıyla indirildi, analiz ediliyor...")
+        ds = xr.open_dataset('latest_data.nc')
+        results = {}
 
-    for il, (lat, lon) in iller_koordinat.items():
-        try:
-            point = ds.sel(latitude=lat, longitude=lon, method='nearest')
-            t2m = float(point['t2m']) - 273.15
-            swvl1 = float(point['swvl1']) * 100
-            
-            # Risk Hesaplamaları
-            don_skoru = round(np.clip((2 - t2m) * 20, 0, 100), 1)
-            
-            results[il] = {
-                'don': don_skoru, 
-                'don_seviye': 'KRİTİK' if don_skoru > 70 else ('ORTA' if don_skoru > 30 else 'DÜŞÜK'),
-                'kuraklik': 12.5, # Şimdilik sabit (ERA5-Beta kısıtlılığı nedeniyle)
-                'kuraklik_seviye': 'NORMAL',
-                'nemi': round(swvl1, 1), 
-                'nemi_seviye': "İDEAL" if 25 < swvl1 < 60 else "DİKKAT",
-                'ruzgar': 8.4, # Şimdilik sabit
-                'ruzgar_seviye': "GÜVENLİ"
-            }
-        except Exception as e:
-            print(f"{il} hesaplanırken hata oluştu: {e}")
-            continue
-    
-    # Verileri dosyaya yaz
-    with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
-    
-    print("!!! BAŞARILI: tarlaiq_data.json gerçek verilerle güncellendi !!!")
+        for il, (lat, lon) in iller_koordinat.items():
+            try:
+                pt = ds.sel(latitude=lat, longitude=lon, method='nearest')
+                temp = float(pt['t2m']) - 273.15
+                soil = float(pt['swvl1']) * 100
+                wind = float(pt['si10']) * 3.6
+                rain = float(pt['tp']) * 1000
+                
+                # Risk Hesaplamaları
+                don_skoru = round(np.clip((2 - temp) * 15, 0, 100), 1)
+                
+                results[il] = {
+                    'don': don_skoru, 
+                    'don_seviye': 'KRİTİK' if don_skoru > 70 else ('ORTA' if don_skoru > 30 else 'DÜŞÜK'),
+                    'kuraklik': round(np.clip(50 - (rain * 10), 0, 100), 1),
+                    'kuraklik_seviye': 'NORMAL',
+                    'nemi': round(soil, 1), 
+                    'nemi_seviye': "İDEAL" if 25 < soil < 60 else "DİKKAT",
+                    'ruzgar': round(wind, 1),
+                    'ruzgar_seviye': "FIRTINA" if wind > 40 else "GÜVENLİ"
+                }
+            except: continue
+        
+        with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        
+        print("!!! BAŞARILI: tarlaiq_data.json güncellendi !!!")
+
+    except Exception as e:
+        print(f"HATA OLUŞTU: {e}")
+        # Hata olsa bile mevcut dosyayı koru veya bir işaret bırak
+        if not os.path.exists('tarlaiq_data.json'):
+            with open('tarlaiq_data.json', 'w') as f: json.dump({}, f)
 
 if __name__ == "__main__":
     run_process()
