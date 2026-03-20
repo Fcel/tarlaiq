@@ -48,11 +48,12 @@ def load_data():
 
 data = load_data()
 
-# --- HAFIZA YÖNETİMİ ---
+# --- HAFIZA YÖNETİMİ (Session State) ---
+# Selectbox ve Harita arasındaki bağı kuran ana değişken
 if 'secilen_il' not in st.session_state:
-    st.session_state.secilen_il = "Gümüşhane"
+    st.session_state['secilen_il'] = "Gümüşhane"
 
-st.title("🌱 TarlaIQ: Senkronize Risk Analizi")
+st.title("🌱 TarlaIQ: Akıllı Tarımsal Risk Platformu")
 
 if data:
     iller = sorted(list(data.keys()))
@@ -61,12 +62,19 @@ if data:
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
-        # Index'i session_state'e göre buluyoruz
-        current_index = iller.index(st.session_state.secilen_il)
-        secilen_il_ui = st.selectbox("📍 İl seçiniz:", iller, index=current_index, key="il_select")
-        st.session_state.secilen_il = secilen_il_ui
+        # ÖNEMLİ: Selectbox'ın indexini session_state'den alıyoruz
+        # Manuel değişimde session_state'i güncellemek için on_change fonksiyonu eklenebilir ama index takibi yeterli
+        current_il = st.selectbox(
+            "📍 İl seçiniz:", 
+            iller, 
+            index=iller.index(st.session_state['secilen_il']),
+            key="il_kutusu"
+        )
+        # Kutudan elle seçilirse hafızayı güncelle
+        st.session_state['secilen_il'] = current_il
 
-    v = data[st.session_state.secilen_il]
+    # Rakamları session_state'deki güncel ile göre çek
+    v = data[st.session_state['secilen_il']]
     
     with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
@@ -77,8 +85,8 @@ if data:
 
     st.divider()
 
-    # --- İNTERAKTİF HARİTA VE ALT SEKMELER ---
-    # Haritayı bir konteyner içine alalım
+    # --- İNTERAKTİF HARİTA ---
+    # Haritayı oluştur
     m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
 
     for il_adi, skorlar in data.items():
@@ -86,27 +94,28 @@ if data:
             color = 'darkred' if skorlar['don'] >= 25 else 'orange' if skorlar['don'] >= 15 else 'green'
             folium.CircleMarker(
                 location=iller_koordinat[il_adi],
-                radius=9,
-                tooltip=il_adi, # Tıklama takibi için tooltip şart
+                radius=10,
+                tooltip=il_adi, # Harita takibi için tooltip kullanıyoruz
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
     # Haritayı çiz ve çıktıyı al
-    map_output = st_folium(m, width="100%", height=500, key="main_map")
+    map_output = st_folium(m, width="100%", height=500, key="ana_harita")
 
-    # --- SENKRONİZASYON KONTROLÜ ---
-    # Haritadan bir ile tıklandıysa session_state'i güncelle ve RERUN yap
+    # --- SENKRONİZASYON TETİKLEYİCİSİ ---
+    # Eğer haritadaki bir noktaya tıklanırsa
     if map_output and map_output.get("last_object_clicked_tooltip"):
         tıklanan_il = map_output["last_object_clicked_tooltip"]
-        if tıklanan_il != st.session_state.secilen_il:
-            st.session_state.secilen_il = tıklanan_il
-            st.rerun()
+        # Eğer tıklanan il, hafızadaki ilden farklıysa hafızayı güncelle ve sayfayı tazele
+        if tıklanan_il != st.session_state['secilen_il']:
+            st.session_state['secilen_il'] = tıklanan_il
+            st.rerun() # Sayfa yeniden yüklenecek ve selectbox indexi yeni ile göre oluşacak
 
     st.divider()
 
-    # --- ALT SEKMELER (ŞİMDİ KAYBOLMAYACAK) ---
+    # --- ALT SEKMELER ---
     tab_list, tab_don, tab_kurak = st.tabs(["📊 Veri Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
     
     with tab_list:
@@ -117,13 +126,9 @@ if data:
     with tab_don:
         if os.path.exists('don_haritasi.png'):
             st.image('don_haritasi.png', caption="Türkiye Don Risk Analizi", use_container_width=True)
-        else:
-            st.info("Don haritası (.png) deponuzda bulunamadı.")
 
     with tab_kurak:
         if os.path.exists('kuraklik_haritasi.png'):
             st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Analizi", use_container_width=True)
-        else:
-            st.info("Kuraklık haritası (.png) deponuzda bulunamadı.")
 else:
-    st.error("Veri dosyası yüklenemedi.")
+    st.error("Veri bulunamadı.")
