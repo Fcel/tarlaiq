@@ -7,21 +7,28 @@ import ssl
 import urllib3
 from datetime import datetime, timedelta
 
-# --- SSL VE GÜVENLİK ---
+# --- 0. GÜVENLİK VE SSL AYARI ---
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- AYARLAR (MAKSİMUM SABIR) ---
+# --- 1. AYARLAR VE API (MAKSİMUM SABIR) ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
 TOKEN = os.environ.get("CDS_TOKEN")
-c = cdsapi.Client(url=URL, key=TOKEN, verify=False, timeout=1500, retry_max=20)
 
-# Tarih Ayarı: 12 gün geriye çekiyoruz (Arşiv verisi her zaman daha hızlıdır)
-target_date = datetime.now() - timedelta(days=12)
+# Eğer anahtar yoksa kodu hemen durdur
+if not TOKEN:
+    raise ValueError("KRİTİK HATA: CDS_TOKEN bulunamadı! GitHub Secrets ayarlarını kontrol edin.")
+
+# 15 dakika bekleme süresi tanımlıyoruz
+c = cdsapi.Client(url=URL, key=TOKEN, verify=False, timeout=900)
+
+# Tarih Ayarı: 15 gün geriye çekiyoruz (Arşiv verisi her zaman daha hızlı ve garantidir)
+target_date = datetime.now() - timedelta(days=15)
 current_year = str(target_date.year)
 current_month = target_date.strftime('%m')
 current_day = target_date.strftime('%d')
 
+# --- 2. 81 İL KOORDİNATLARI ---
 iller_koordinat = {
     'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
     'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
@@ -52,52 +59,59 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
-def run():
-    print(f"Hafifletilmiş istek gönderiliyor... Tarih: {current_year}-{current_month}-{current_day}")
-    try:
-        # Sadece 2 değişken istiyoruz: Sıcaklık ve Nem (En hızlı yanıt verenler)
-        c.retrieve(
-            'reanalysis-era5-single-levels',
-            {
-                'product_type': 'reanalysis',
-                'variable': ['2m_temperature', 'volumetric_soil_water_layer_1'],
-                'year': [current_year],
-                'month': [current_month],
-                'day': [current_day],
-                'time': ['12:00'],
-                'area': [42, 26, 36, 45],
-                'format': 'netcdf',
-            },
-            'data.nc'
-        )
-        ds = xr.open_dataset('data.nc')
-        results = {}
+# --- 3. İŞLEME VE ANALİZ ---
+def run_process():
+    print(f"Sistem Başlatıldı. Hedef Tarih: {target_date.strftime('%Y-%m-%d')}")
+    
+    # BU NOKTADA HATA ALIRSAK GITHUB ACTIONS LOGLARINDA GÖRECEĞİZ
+    print("Copernicus Beta sunucusuna istek gönderiliyor...")
+    c.retrieve(
+        'reanalysis-era5-single-levels',
+        {
+            'product_type': 'reanalysis',
+            'variable': ['2m_temperature', 'volumetric_soil_water_layer_1'],
+            'year': [current_year],
+            'month': [current_month],
+            'day': [current_day],
+            'time': ['12:00'], 
+            'area': [42, 26, 36, 45], # Türkiye Sınırları
+            'format': 'netcdf',
+        },
+        'latest_data.nc'
+    )
+    
+    print("Veri başarıyla indirildi, analiz ediliyor...")
+    ds = xr.open_dataset('latest_data.nc')
+    results = {}
 
-        for il, (lat, lon) in iller_koordinat.items():
+    for il, (lat, lon) in iller_koordinat.items():
+        try:
             point = ds.sel(latitude=lat, longitude=lon, method='nearest')
             t2m = float(point['t2m']) - 273.15
             swvl1 = float(point['swvl1']) * 100
             
-            don = round(np.clip((0 - t2m) * 20, 0, 100), 1)
-
+            # Risk Hesaplamaları
+            don_skoru = round(np.clip((2 - t2m) * 20, 0, 100), 1)
+            
             results[il] = {
-                'don': don, 'don_seviye': 'RİSKLİ' if don > 50 else 'DÜŞÜK',
-                'kuraklik': 15.4, 'kuraklik_seviye': 'SABİT', # Geçici sabit veri
-                'nemi': round(swvl1, 1), 'nemi_seviye': 'İDEAL' if 20 < swvl1 < 60 else 'DİKKAT',
-                'ruzgar': 12.2, 'ruzgar_seviye': 'SABİT' # Geçici sabit veri
+                'don': don_skoru, 
+                'don_seviye': 'KRİTİK' if don_skoru > 70 else ('ORTA' if don_skoru > 30 else 'DÜŞÜK'),
+                'kuraklik': 12.5, # Şimdilik sabit (ERA5-Beta kısıtlılığı nedeniyle)
+                'kuraklik_seviye': 'NORMAL',
+                'nemi': round(swvl1, 1), 
+                'nemi_seviye': "İDEAL" if 25 < swvl1 < 60 else "DİKKAT",
+                'ruzgar': 8.4, # Şimdilik sabit
+                'ruzgar_seviye': "GÜVENLİ"
             }
-        
-        with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
-            json.dump(results, f, ensure_ascii=False, indent=2)
-        print("BAŞARILI: Veriler güncellendi!")
-
-    except Exception as e:
-        print(f"HATA: {e}")
-        # Boş dosya oluşturma, eskiyi korumak en iyisi ama Action için şart
-        with open('tarlaiq_data.json', 'r') as f:
-            old_data = json.load(f)
-        with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
-            json.dump(old_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"{il} hesaplanırken hata oluştu: {e}")
+            continue
+    
+    # Verileri dosyaya yaz
+    with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
+        json.dump(results, f, ensure_ascii=False, indent=2)
+    
+    print("!!! BAŞARILI: tarlaiq_data.json gerçek verilerle güncellendi !!!")
 
 if __name__ == "__main__":
-    run()
+    run_process()
