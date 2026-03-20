@@ -14,7 +14,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- 1. AYARLAR VE API BAĞLANTISI ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
-TOKEN = os.environ.get("CDS_TOKEN") 
+TOKEN = os.environ.get("CDS_TOKEN")
 
 if not TOKEN:
     raise ValueError("CDS_TOKEN bulunamadı! GitHub Secrets ayarlarını kontrol edin.")
@@ -62,15 +62,15 @@ iller_koordinat = {
 
 # --- 3. VERİ ÇEKME ---
 def fetch_data():
-    print("Copernicus'tan veriler çekiliyor (SSL koruması devredışı)...")
+    print(f"Copernicus'tan veriler çekiliyor (Ay: {current_month}, Günler: {current_days})")
     try:
         c.retrieve(
             'reanalysis-era5-single-levels',
             {
                 'product_type': 'reanalysis',
                 'variable': [
-                    '2m_temperature', 
-                    'total_precipitation', 
+                    '2m_temperature',
+                    'total_precipitation',
                     'potential_evaporation',
                     'volumetric_soil_water_layer_1',
                     '10m_wind_speed'
@@ -86,40 +86,43 @@ def fetch_data():
         )
         return xr.open_dataset('latest_data.nc')
     except Exception as e:
-        print(f"Veri çekme hatası: {e}")
+        print(f"VERİ ÇEKME HATASI: {e}")
         return None
 
 # --- 4. RİSK HESAPLAMA ---
 def calculate_risks(ds):
     if ds is None: return None, None, None, None, None
-    print("Hesaplamalar yapılıyor...")
-    
+    print("Risk hesaplamaları yapılıyor...")
+
     # Don Skoru
     temp = ds['t2m'] - 273.15
     don_map = np.clip((2 - temp.min(dim='time')) * 20, 0, 100)
-    
+
     # Kuraklık Skoru
     yagis = ds['tp'] * 1000
     pet = abs(ds['pev']) * 1000
     oran = yagis.mean(dim='time') / (pet.mean(dim='time') + 0.001)
     kuraklik_map = np.clip((1 - oran) * 50, 0, 100)
-    
-    # Toprak Nemi (% bazlı)
+
+    # Toprak Nemi
     nemi_raw = ds['swvl1'].mean(dim='time')
-    nemi_map = np.clip(nemi_raw * 250, 0, 100) 
-    
+    nemi_map = np.clip(nemi_raw * 250, 0, 100)
+
     # Rüzgar Riski
     wind_raw = ds['si10'].max(dim='time')
     ruzgar_map = np.clip(wind_raw * 6.6, 0, 100)
-    
+
     # Yağış Skoru
     yagis_map = np.clip(yagis.mean(dim='time') * 14, 0, 100)
-    
+
     return don_map, kuraklik_map, yagis_map, nemi_map, ruzgar_map
 
 # --- 5. JSON OLUŞTURMA ---
 def create_json(don, kurak, yagis, nemi, ruzgar):
-    if don is None: return
+    if don is None:
+        print("Hesaplanan veri yok, JSON oluşturulmadı.")
+        return
+    
     results = {}
     
     def get_level(skor):
@@ -143,14 +146,22 @@ def create_json(don, kurak, yagis, nemi, ruzgar):
                 'nemi': round(n_val, 1), 'nemi_seviye': "İDEAL" if 25 < n_val < 65 else "KRİTİK",
                 'ruzgar': round(r_val, 1), 'ruzgar_seviye': "GÜVENLİ" if r_val < 35 else "FIRTINA"
             }
-        except: continue
+        except Exception as e:
+            continue
     
-    with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
+    output_path = 'tarlaiq_data.json'
+    with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
-    print("JSON başarıyla kaydedildi.")
+    
+    if os.path.exists(output_path):
+        print(f"BAŞARILI: {output_path} dosyası oluşturuldu.")
+    else:
+        print("HATA: Dosya yazılamadı!")
 
 if __name__ == "__main__":
-    ds = fetch_data()
-    if ds:
-        d, k, y, n, r = calculate_risks(ds)
+    dataset = fetch_data()
+    if dataset:
+        d, k, y, n, r = calculate_risks(dataset)
         create_json(d, k, y, n, r)
+    else:
+        print("Sistem veri çekemediği için durduruldu.")
