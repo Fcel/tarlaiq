@@ -8,7 +8,7 @@ from streamlit_folium import st_folium
 # --- SAYFA AYARLARI ---
 st.set_page_config(page_title="TarlaIQ | Dr. Fatih", page_icon="🌱", layout="wide")
 
-# --- KOORDİNAT VERİTABANI ---
+# --- KOORDİNAT VERİTABANI (Gömülü) ---
 iller_koordinat = {
     'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
     'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
@@ -49,25 +49,21 @@ def load_data():
 
 data = load_data()
 
-# --- SİSTEM HAFIZASI (Session State) ---
-if 'secilen_il' not in st.session_state:
-    st.session_state.secilen_il = "Gümüşhane"
-
-st.title("🌱 TarlaIQ: Akıllı Tarımsal Risk Platformu")
+# --- ARAYÜZ ---
+st.title("🌱 TarlaIQ: İnteraktif Tarımsal Risk Analizi")
+st.markdown("### Dr. Fatih Celik | Karar Destek Sistemi")
 
 if data:
     iller = sorted(list(data.keys()))
-
-    # --- ÜST PANEL (METRİKLER) ---
+    
+    # Üst Bölüm: Metrikler
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
-        # Selectbox'ı session_state üzerinden kontrol ediyoruz
-        il_index = iller.index(st.session_state.secilen_il)
-        secilen_il = st.selectbox("📍 İl seçiniz:", iller, index=il_index, key="il_kutu")
-        st.session_state.secilen_il = secilen_il
-
-    v = data[st.session_state.secilen_il]
+        secilen_il = st.selectbox("📍 İl seçiniz:", iller, 
+                                  index=iller.index("Gümüşhane") if "Gümüşhane" in iller else 0)
+    
+    v = data[secilen_il]
     
     with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
@@ -79,34 +75,47 @@ if data:
     st.divider()
 
     # --- İNTERAKTİF HARİTA ---
+    st.subheader("🗺️ Türkiye Tarımsal Risk Haritası")
+    
+    # Haritayı oluştur (Türkiye merkezli)
     m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
 
     for il_adi, skorlar in data.items():
         if il_adi in iller_koordinat:
-            color = 'darkred' if skorlar['don'] >= 25 else 'orange' if skorlar['don'] >= 15 else 'green'
+            coords = iller_koordinat[il_adi]
+            
+            # Don riskine göre renk belirleme
+            if skorlar['don'] >= 25: color = 'darkred'
+            elif skorlar['don'] >= 15: color = 'orange'
+            else: color = 'green'
+            
+            # Popup İçeriği
+            popup_text = f"""
+            <div style='font-family: Arial; width: 150px;'>
+                <h4 style='margin-bottom:5px;'>{il_adi}</h4>
+                <hr style='margin:5px 0;'>
+                <b>Don:</b> %{skorlar['don']}<br>
+                <b>Kuraklık:</b> %{skorlar['kuraklik']}<br>
+                <b>Yağış:</b> {skorlar['yagis']}
+            </div>
+            """
+            
             folium.CircleMarker(
-                location=iller_koordinat[il_adi],
-                radius=10,
+                location=coords,
+                radius=7,
+                popup=folium.Popup(popup_text, max_width=200),
                 tooltip=il_adi,
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
-    # Haritayı çiz ve çıktıyı al
-    map_out = st_folium(m, width="100%", height=500, key="ana_harita")
+    # Haritayı ekrana bas
+    st_folium(m, width="100%", height=500)
 
-    # Tıklama kontrolü (Haritadan il seçilirse sayfayı tazele)
-    if map_out and map_out.get("last_object_clicked_tooltip"):
-        yeni_il = map_out["last_object_clicked_tooltip"]
-        if yeni_il != st.session_state.secilen_il:
-            st.session_state.secilen_il = yeni_il
-            st.rerun()
-
+    # --- TABLOLAR VE DİĞER HARİTALAR ---
     st.divider()
-
-    # --- ALT SEKMELER (GÖRSEL ŞÖLEN) ---
-    tab_list, tab_don, tab_kurak = st.tabs(["📊 Risk Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
+    tab_list, tab_don, tab_kurak = st.tabs(["📊 Veri Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
     
     with tab_list:
         df = pd.DataFrame.from_dict(data, orient='index').reset_index()
@@ -115,14 +124,11 @@ if data:
 
     with tab_don:
         if os.path.exists('don_haritasi.png'):
-            st.image('don_haritasi.png', caption="Türkiye Don Risk Analizi (Heatmap)", use_container_width=True)
-        else:
-            st.info("Don haritası (.png) deponuzda bulunamadı.")
+            st.image('don_haritasi.png', caption="Statik Don Risk Analizi", use_container_width=True)
 
     with tab_kurak:
         if os.path.exists('kuraklik_haritasi.png'):
-            st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Analizi (Heatmap)", use_container_width=True)
-        else:
-            st.info("Kuraklık haritası (.png) deponuzda bulunamadı.")
+            st.image('kuraklik_haritasi.png', caption="Statik Kuraklık Analizi", use_container_width=True)
+
 else:
-    st.error("Veri dosyası (tarlaiq_data.json) bulunamadı.")
+    st.error("Veri bulunamadı. Lütfen JSON dosyasını kontrol edin.")
