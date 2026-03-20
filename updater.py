@@ -14,10 +14,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # --- AYARLAR ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
 TOKEN = os.environ.get("CDS_TOKEN")
-# Timeout süresini 20 dakikaya çıkardık (Kuyruk beklemek için)
 c = cdsapi.Client(url=URL, key=TOKEN, verify=False, timeout=1200)
 
-# Tarih: 15 gün geriye çekiyoruz (Arşiv verisi daha hızlı gelir)
+# Tarih: 15 gün geriye (Arşiv verisi garantidir)
 target_date = datetime.now() - timedelta(days=15)
 current_year = [str(target_date.year)]
 current_month = [target_date.strftime('%m')]
@@ -31,23 +30,17 @@ iller_koordinat = {
 def run_process():
     print(f"İşlem Başladı. Hedef Tarih: {target_date.strftime('%Y-%m-%d')}")
     try:
-        # BETA SİSTEMİ İÇİN KRİTİK LİSTE FORMATI
         c.retrieve(
             'reanalysis-era5-single-levels',
             {
                 'product_type': ['reanalysis'],
-                'variable': [
-                    '2m_temperature', 
-                    'volumetric_soil_water_layer_1',
-                    '10m_wind_speed',
-                    'total_precipitation'
-                ],
+                'variable': ['2m_temperature', 'volumetric_soil_water_layer_1', '10m_wind_speed', 'total_precipitation'],
                 'year': current_year,
                 'month': current_month,
                 'day': current_day,
                 'time': ['12:00'],
                 'area': [42.1, 26.0, 35.9, 44.9],
-                'data_format': 'netcdf', # 'format' değil 'data_format'
+                'data_format': 'netcdf',
             },
             'latest_data.nc'
         )
@@ -71,7 +64,7 @@ def run_process():
                 'nemi': round(soil, 1), 
                 'nemi_seviye': "İDEAL" if 25 < soil < 60 else "DİKKAT",
                 'ruzgar': round(wind, 1),
-                'ruzgar_seviye': "GÜVENLİ"
+                'ruzgar_seviye': "FIRTINA" if wind > 40 else "GÜVENLİ"
             }
         
         with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
