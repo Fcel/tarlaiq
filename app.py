@@ -48,8 +48,7 @@ def load_data():
 
 data = load_data()
 
-# --- SENKRONİZASYON MANTIĞI ---
-# Eğer hafızada (session_state) seçili bir il yoksa varsayılanı ata
+# --- HAFIZA YÖNETİMİ ---
 if 'secilen_il' not in st.session_state:
     st.session_state.secilen_il = "Gümüşhane"
 
@@ -62,10 +61,10 @@ if data:
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
-        # Selectbox, session_state'deki il bilgisini kullanır
-        secilen_il = st.selectbox("📍 İl seçiniz:", iller, 
-                                  index=iller.index(st.session_state.secilen_il))
-        st.session_state.secilen_il = secilen_il
+        # Index'i session_state'e göre buluyoruz
+        current_index = iller.index(st.session_state.secilen_il)
+        secilen_il_ui = st.selectbox("📍 İl seçiniz:", iller, index=current_index, key="il_select")
+        st.session_state.secilen_il = secilen_il_ui
 
     v = data[st.session_state.secilen_il]
     
@@ -78,7 +77,8 @@ if data:
 
     st.divider()
 
-    # --- İNTERAKTİF HARİTA ---
+    # --- İNTERAKTİF HARİTA VE ALT SEKMELER ---
+    # Haritayı bir konteyner içine alalım
     m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
 
     for il_adi, skorlar in data.items():
@@ -86,20 +86,44 @@ if data:
             color = 'darkred' if skorlar['don'] >= 25 else 'orange' if skorlar['don'] >= 15 else 'green'
             folium.CircleMarker(
                 location=iller_koordinat[il_adi],
-                radius=8,
-                tooltip=il_adi, # Tooltip tıklama takibi için kritiktir
+                radius=9,
+                tooltip=il_adi, # Tıklama takibi için tooltip şart
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
-    # Haritayı çalıştır ve tıklanan veriyi yakala
-    map_data = st_folium(m, width="100%", height=500, key="main_map")
+    # Haritayı çiz ve çıktıyı al
+    map_output = st_folium(m, width="100%", height=500, key="main_map")
 
-    # --- SENKRONİZASYON TETİKLEYİCİ ---
-    # Eğer haritada bir noktaya tıklandıysa:
-    if map_data["last_object_clicked_tooltip"]:
-        tıklanan_il = map_data["last_object_clicked_tooltip"]
+    # --- SENKRONİZASYON KONTROLÜ ---
+    # Haritadan bir ile tıklandıysa session_state'i güncelle ve RERUN yap
+    if map_output and map_output.get("last_object_clicked_tooltip"):
+        tıklanan_il = map_output["last_object_clicked_tooltip"]
         if tıklanan_il != st.session_state.secilen_il:
             st.session_state.secilen_il = tıklanan_il
-            st.rerun() # Sayfayı yeni il bilgisiyle tekrar çalıştır
+            st.rerun()
+
+    st.divider()
+
+    # --- ALT SEKMELER (ŞİMDİ KAYBOLMAYACAK) ---
+    tab_list, tab_don, tab_kurak = st.tabs(["📊 Veri Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
+    
+    with tab_list:
+        df = pd.DataFrame.from_dict(data, orient='index').reset_index()
+        df.columns = ['İl', 'Don Skoru', 'Don Seviyesi', 'Kuraklık Skoru', 'Kuraklık Seviyesi', 'Yağış Skoru', 'Yağış Seviyesi']
+        st.dataframe(df.sort_values('Don Skoru', ascending=False), use_container_width=True, hide_index=True)
+
+    with tab_don:
+        if os.path.exists('don_haritasi.png'):
+            st.image('don_haritasi.png', caption="Türkiye Don Risk Analizi", use_container_width=True)
+        else:
+            st.info("Don haritası (.png) deponuzda bulunamadı.")
+
+    with tab_kurak:
+        if os.path.exists('kuraklik_haritasi.png'):
+            st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Analizi", use_container_width=True)
+        else:
+            st.info("Kuraklık haritası (.png) deponuzda bulunamadı.")
+else:
+    st.error("Veri dosyası yüklenemedi.")
