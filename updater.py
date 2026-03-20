@@ -25,7 +25,7 @@ c = cdsapi.Client(
 )
 
 # Tarih Ayarı: 7 gün geriye çekiyoruz (En garanti veri aralığı)
-target_date = datetime.now() - timedelta(days=7)
+target_date = datetime.now() - timedelta(days=10)
 current_year = str(target_date.year)
 current_month = target_date.strftime('%m')
 current_day = target_date.strftime('%d')
