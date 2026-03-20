@@ -2,21 +2,20 @@ name: TarlaIQ Daily Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Her gece Türkiye saatiyle 03:00'te otomatik çalışır
-  workflow_dispatch: # Manuel çalıştırma butonu (Test için)
+    - cron: '0 0 * * *' # Her gece 03:00'te çalışır
+  workflow_dispatch: # Manuel çalıştırma butonu
 
 jobs:
   update_data:
     runs-on: ubuntu-latest
-    # Dosya yazma izni için gerekli olan kritik ayar
     permissions:
-      contents: write
+      contents: write # Yazma izni şart
       
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Tüm geçmişi çekerek çakışmaları önler
+          fetch-depth: 0 # Tüm geçmişi çek (Çakışma riskini bitirir)
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,9 +35,14 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          # Çakışmaları önlemek için önce senin değişikliklerini çekip üzerine yazar
-          git pull origin main --rebase
+          
+          # ÇAKIŞMAYI ÖNLEYEN KRİTİK ADIMLAR:
+          git fetch origin main
+          git rebase origin/main # Senin yaptığın manuel değişiklikleri robotun verisinin altına ekler
+          
           git add tarlaiq_data.json
-          # Eğer veri değişmediyse hata vermeden devam etmesini sağlar
-          git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok, devam ediliyor."
+          # Eğer veri değişmemişse hata vermeden geçmesi için '|| true' ekledik
+          git commit -m "Otomatik Veri Güncelleme: $(date)" || true
+          
+          # En son halini zorla değil, güvenle gönderir
           git push origin main
