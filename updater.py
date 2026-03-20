@@ -53,7 +53,7 @@ def run_process():
     print(f"İşlem Başladı. Hedef Tarih: {target_date.strftime('%Y-%m-%d')}")
     
     try:
-        # Tırnak hataları giderilmiş ve Beta'ya uygun istek
+        # Tırnak hataları tamamen giderilmiş blok
         c.retrieve(
             'reanalysis-era5-single-levels',
             {
@@ -85,14 +85,13 @@ def run_process():
                 wind = float(pt['si10']) * 3.6
                 rain = float(pt['tp']) * 1000
                 
-                # GitHub güncelleme garantisi için mikro-fark
+                # Mikro-fark (GitHub Force Update için)
                 fake_diff = random.uniform(0.001, 0.005)
-                
-                don_hesabi = round(np.clip((2 - temp) * 15, 0, 100), 1)
+                don_puan = round(np.clip((2 - temp) * 15, 0, 100), 1)
                 
                 results[il] = {
-                    'don': round(don_hesabi + fake_diff, 1), 
-                    'don_seviye': 'KRİTİK' if don_hesabi > 70 else ('ORTA' if don_hesabi > 30 else 'DÜŞÜK'),
+                    'don': round(don_puan + fake_diff, 1), 
+                    'don_seviye': 'KRİTİK' if don_puan > 70 else ('ORTA' if don_puan > 30 else 'DÜŞÜK'),
                     'kuraklik': round(np.clip(50 - (rain * 10), 0, 100), 1),
                     'kuraklik_seviye': 'NORMAL',
                     'nemi': round(soil + fake_diff, 1), 
@@ -100,17 +99,17 @@ def run_process():
                     'ruzgar': round(wind, 1),
                     'ruzgar_seviye': "GÜVENLİ"
                 }
-            except: continue
+            except:
+                continue
         
-        # Zaman Damgası
         results["Son_Guncelleme"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
-        print("!!! BAŞARILI: Tüm Türkiye verileri güncellendi !!!")
+        print("!!! BAŞARILI: Veriler güncellendi !!!")
 
     except Exception as e:
-        print(f"HATA: {e}")
+        print(f"HATA OLUŞTU: {e}")
 
 if __name__ == "__main__":
     run_process()
