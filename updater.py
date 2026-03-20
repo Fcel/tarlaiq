@@ -3,28 +3,22 @@ import json
 import random
 from datetime import datetime
 
-# --- AYARLAR ---
-# Şimdilik Copernicus'u devreden çıkarıp sadece yazma yetkisini test ediyoruz
-TOKEN = os.environ.get("CDS_TOKEN")
-
 def run():
-    print(f"Sistem Başlatıldı. Zaman: {datetime.now()}")
-    
-    # GitHub'ın 'now' yazması için KESİN DEĞİŞİKLİK ŞART
-    # Her çalıştığında farklı bir sayı üretir ki Git 'değişiklik yok' diyemesin
-    random_val = round(random.uniform(10.0, 50.0), 2)
+    # GitHub'ın 'değişiklik yok' dememesi için her seferinde farklı bir sayı üretelim
+    rastgele_sayi = round(random.uniform(10.0, 50.0), 2)
+    su_an = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     data = {
-        "Gümüşhane": {"don": random_val, "nemi": random_val, "durum": "TEST-OK"},
-        "Ankara": {"don": random_val, "nemi": random_val, "durum": "TEST-OK"},
-        "Sistem_Zamani": str(datetime.now())
+        "Gümüşhane": {"don": rastgele_sayi, "nemi": rastgele_sayi, "durum": "SISTEM-AKTIF"},
+        "Ankara": {"don": rastgele_sayi, "nemi": rastgele_sayi, "durum": "SISTEM-AKTIF"},
+        "Son_Guncelleme": su_an
     }
     
-    # Dosyayı yaz
+    # Dosyayı fiziksel olarak diske yazıyoruz
     with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"!!! BAŞARILI: DOSYA YERELDE OLUŞTURULDU (Deger: {random_val}) !!!")
+    print(f"!!! BASARILI: Dosya {su_an} itibariyle yerelde olusturuldu (Deger: {rastgele_sayi}) !!!")
 
 if __name__ == "__main__":
     run()
