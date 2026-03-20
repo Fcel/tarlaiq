@@ -1,0 +1,650 @@
+{
+  "Ardahan": {
+    "don": 29.1,
+    "don_seviye": "ORTA",
+    "kuraklik": 28.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.5,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Erzurum": {
+    "don": 25.5,
+    "don_seviye": "ORTA",
+    "kuraklik": 27.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kars": {
+    "don": 22.3,
+    "don_seviye": "ORTA",
+    "kuraklik": 30.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Hakkari": {
+    "don": 20.6,
+    "don_seviye": "ORTA",
+    "kuraklik": 28.3,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 3.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Erzincan": {
+    "don": 19.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 27.8,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Gümüşhane": {
+    "don": 19.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 26.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.5,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Ağrı": {
+    "don": 16.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 29.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bayburt": {
+    "don": 15.7,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 27.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Van": {
+    "don": 15.7,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.0,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bingöl": {
+    "don": 12.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 27.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Muş": {
+    "don": 11.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 26.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bitlis": {
+    "don": 11.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 26.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Artvin": {
+    "don": 10.2,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 24.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 3.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Niğde": {
+    "don": 8.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 33.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Sivas": {
+    "don": 8.3,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 31.0,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kayseri": {
+    "don": 7.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.3,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Iğdır": {
+    "don": 7.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bolu": {
+    "don": 6.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Düzce": {
+    "don": 6.2,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Karabük": {
+    "don": 6.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.0,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kastamonu": {
+    "don": 5.6,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Tunceli": {
+    "don": 5.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Nevşehir": {
+    "don": 5.3,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.0,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Tokat": {
+    "don": 5.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Yozgat": {
+    "don": 4.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Ankara": {
+    "don": 4.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 37.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Afyonkarahisar": {
+    "don": 4.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bilecik": {
+    "don": 4.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 33.3,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Çankırı": {
+    "don": 4.3,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 37.3,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kırıkkale": {
+    "don": 4.2,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 38.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Çorum": {
+    "don": 4.2,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 33.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Eskişehir": {
+    "don": 4.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 34.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kırşehir": {
+    "don": 3.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 37.8,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Şırnak": {
+    "don": 3.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kütahya": {
+    "don": 3.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bartın": {
+    "don": 3.7,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Sakarya": {
+    "don": 3.7,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Konya": {
+    "don": 3.7,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 37.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kırklareli": {
+    "don": 3.7,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kocaeli": {
+    "don": 3.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Edirne": {
+    "don": 3.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 39.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Siirt": {
+    "don": 3.2,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.5,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Isparta": {
+    "don": 3.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 33.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Malatya": {
+    "don": 3.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Aksaray": {
+    "don": 3.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 38.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Çanakkale": {
+    "don": 2.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.8,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Elazığ": {
+    "don": 2.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 31.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Amasya": {
+    "don": 2.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 32.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Bursa": {
+    "don": 2.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 31.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Uşak": {
+    "don": 2.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 38.1,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Burdur": {
+    "don": 2.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Hatay": {
+    "don": 2.6,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 32.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Karaman": {
+    "don": 2.6,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 38.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Balıkesir": {
+    "don": 2.6,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 37.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Muğla": {
+    "don": 2.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.7,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Diyarbakır": {
+    "don": 2.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 32.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Manisa": {
+    "don": 2.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 38.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Batman": {
+    "don": 2.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 32.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.2,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Osmaniye": {
+    "don": 2.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 32.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Samsun": {
+    "don": 2.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 29.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Adıyaman": {
+    "don": 2.4,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 34.0,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.1,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Tekirdağ": {
+    "don": 2.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 0.9,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Zonguldak": {
+    "don": 2.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Yalova": {
+    "don": 2.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 30.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Mardin": {
+    "don": 2.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Sinop": {
+    "don": 2.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 26.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Şanlıurfa": {
+    "don": 2.1,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 35.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.8,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Aydın": {
+    "don": 2.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 39.3,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Trabzon": {
+    "don": 2.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 23.8,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kilis": {
+    "don": 2.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Rize": {
+    "don": 2.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 24.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.7,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Kahramanmaraş": {
+    "don": 2.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.4,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Gaziantep": {
+    "don": 2.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 36.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Denizli": {
+    "don": 1.9,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 40.7,
+    "kuraklik_seviye": "YÜKSEK",
+    "yagis": 1.0,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "İstanbul": {
+    "don": 1.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 31.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Giresun": {
+    "don": 1.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 27.2,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "İzmir": {
+    "don": 1.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 39.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.6,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Ordu": {
+    "don": 1.8,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 26.6,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.4,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Antalya": {
+    "don": 1.6,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 37.5,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 2.3,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Adana": {
+    "don": 1.5,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 38.8,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.5,
+    "yagis_seviye": "DÜŞÜK"
+  },
+  "Mersin": {
+    "don": 1.0,
+    "don_seviye": "DÜŞÜK",
+    "kuraklik": 28.9,
+    "kuraklik_seviye": "ORTA",
+    "yagis": 1.3,
+    "yagis_seviye": "DÜŞÜK"
+  }
+}
