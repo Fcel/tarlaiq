@@ -1,0 +1,35 @@
+name: TarlaIQ Daily Data Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Her gece Türkiye saatiyle 03:00'te çalışır
+  workflow_dispatch: # Manuel çalıştırma butonu ekler
+
+jobs:
+  update_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas xarray numpy cdsapi netCDF4
+
+      - name: Run update script
+        env:
+          CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
+        run: python updater.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add tarlaiq_data.json
+          git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
+          git push
