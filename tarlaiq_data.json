@@ -1,0 +1,812 @@
+{
+  "Adana": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Adıyaman": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Afyonkarahisar": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Ağrı": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Amasya": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Ankara": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Antalya": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Artvin": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Aydın": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Balıkesir": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bilecik": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bingöl": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bitlis": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bolu": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Burdur": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bursa": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Çanakkale": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Çankırı": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Çorum": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Denizli": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Diyarbakır": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Edirne": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Elazığ": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Erzincan": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Erzurum": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Eskişehir": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Gaziantep": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Giresun": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Gümüşhane": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Hakkari": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Hatay": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Isparta": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Mersin": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "İstanbul": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "İzmir": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kars": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kastamonu": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kayseri": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kırklareli": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kırşehir": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kocaeli": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Konya": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kütahya": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Malatya": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Manisa": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kahramanmaraş": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Mardin": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Muğla": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Muş": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Nevşehir": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Niğde": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Ordu": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Rize": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Sakarya": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Samsun": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Siirt": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Sinop": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Sivas": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Tekirdağ": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Tokat": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Trabzon": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Tunceli": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Şanlıurfa": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Uşak": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Van": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Yozgat": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Zonguldak": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Aksaray": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bayburt": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Karaman": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kırıkkale": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Batman": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Şırnak": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Bartın": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Ardahan": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Iğdır": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Yalova": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Karabük": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Kilis": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Osmaniye": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  },
+  "Düzce": {
+    "don": 0,
+    "don_seviye": "MEŞGUL",
+    "kuraklik": 0,
+    "kuraklik_seviye": "MEŞGUL",
+    "nemi": 0,
+    "nemi_seviye": "MEŞGUL",
+    "ruzgar": 0,
+    "ruzgar_seviye": "MEŞGUL"
+  }
+}
