@@ -65,17 +65,21 @@ def run_process():
     
     # BU NOKTADA HATA ALIRSAK GITHUB ACTIONS LOGLARINDA GÖRECEĞİZ
     print("Copernicus Beta sunucusuna istek gönderiliyor...")
+    
     c.retrieve(
-        'reanalysis-era5-single-levels', # Eğer bu yine 404 verirse altına bak
+        'reanalysis-era5-single-levels',
         {
-            'product_type': ['reanalysis'], # Liste içine aldık (Beta kuralı)
-            'variable': ['2m_temperature', 'volumetric_soil_water_layer_1'],
-            'year': [current_year],
-            'month': [current_month],
-            'day': [current_day],
-            'time': ['12:00'], 
+            'product_type': ['reanalysis'],           # Liste [] içinde olmalı
+            'variable': [                             # Değişkenler liste içinde
+                '2m_temperature', 
+                'volumetric_soil_water_layer_1'
+            ],
+            'year': [current_year],                   # Liste zorunlu
+            'month': [current_month],                 # Liste zorunlu
+            'day': [current_day],                     # Liste zorunlu
+            'time': ['12:00'],                        # Liste zorunlu
             'area': [42, 26, 36, 45],
-            'data_format': 'netcdf', # 'format' yerine 'data_format' deniyoruz (Beta kuralı)
+            'data_format': 'netcdf',                  # 'format' değil 'data_format' olmalı
         },
         'latest_data.nc'
     )
