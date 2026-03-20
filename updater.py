@@ -3,13 +3,7 @@ import json
 import xarray as xr
 import numpy as np
 import cdsapi
-import ssl
-import urllib3
 from datetime import datetime, timedelta
-
-# --- GÜVENLİK ---
-ssl._create_default_https_context = ssl._create_unverified_context
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- AYARLAR ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
@@ -20,7 +14,7 @@ if not TOKEN:
 
 c = cdsapi.Client(url=URL, key=TOKEN, verify=False, timeout=600)
 
-# Veri garantisi için 20 gün geriye gidiyoruz
+# Veri garantisi için 20 gün geriye (Beta sistemi için en güvenli tarih)
 target_date = datetime.now() - timedelta(days=20)
 y, m, d = [str(target_date.year)], [target_date.strftime('%m')], [target_date.strftime('%d')]
 
@@ -29,7 +23,8 @@ iller = {'Gümüşhane': (40.5, 39.5), 'Ankara': (39.9, 32.8), 'İstanbul': (41.
 def run():
     print(f"İşlem Başladı: {target_date.strftime('%Y-%m-%d')}")
     
-    # EĞER BURADA HATA VARSA ROBOT KIRMIZI YANACAK (404, Kütüphane vb.)
+    # EĞER BURADA HATA VARSA ROBOT KIRMIZI YANACAK
+    # 404 Hatası alırsak burada 'raise' edecek
     c.retrieve('reanalysis-era5-single-levels', {
         'product_type': ['reanalysis'],
         'variable': ['2m_temperature', 'volumetric_soil_water_layer_1'],
@@ -50,7 +45,6 @@ def run():
             'don_seviye': 'TEST-AKTIF',
             'kuraklik': 15.0, 
             'nemi': round(soil, 1), 
-            'ruzgar': 10.0,
             'zaman': datetime.now().strftime('%H:%M:%S')
         }
     
