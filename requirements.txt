@@ -7,3 +7,7 @@ cartopy
 cdsapi
 netCDF4
 cdsapi>=0.7.0
+streamlit
+pandas
+folium
+streamlit-folium
