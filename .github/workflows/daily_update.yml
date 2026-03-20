@@ -1,45 +1,24 @@
 name: TarlaIQ Daily Data Update
-
 on:
-  workflow_dispatch: # Manuel buton
-
+  workflow_dispatch:
 permissions:
-  contents: write # Yazma izni
-
+  contents: write
 jobs:
   update_data:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Kendi iç anahtarını kullan
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
-      - name: Install Dependencies
-        run: |
-          pip install --upgrade cdsapi xarray numpy netCDF4 scipy
-
-      - name: Run update script
+      - name: Run Script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
         run: python updater.py
-
-      - name: Commit and Force Push
+      - name: Force Push to GitHub
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
-          # Dosyayı ekle
           git add tarlaiq_data.json
-          
-          # Değişiklik varsa commit et
           git commit -m "Zorunlu Guncelleme: $(date)" || echo "Degisiklik yok"
-          
-          # BURASI ÇOK KRİTİK: Uzak sunucuyu ezerek gönder
           git push origin main --force
