@@ -1,28 +1,43 @@
 name: TarlaIQ Daily Data Update
+
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manuel çalıştırma butonu
+
 permissions:
   contents: write
+
 jobs:
   update_data:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Install Libraries
+
+      - name: Install Scientific Libraries
         run: |
           pip install --upgrade pip
+          # Copernicus Beta için en güncel cdsapi şart:
           pip install cdsapi xarray netCDF4 scipy numpy pandas
-      - name: Run Script
+          
+      - name: Run update script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
         run: python updater.py
-      - name: Push to GitHub
+
+      - name: Commit and Force Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add tarlaiq_data.json
-          git commit -m "Zorunlu Guncelleme: $(date)" || echo "Degisiklik yok"
+          # Değişiklik varsa commit et, yoksa hata verme geç
+          git commit -m "Gercek Veri Guncelleme (30 Gun Geri): $(date)" || echo "Degisiklik yok"
+          # Uzak sunucuyla senkronize ol ve zorla gönder
+          git pull --rebase origin main
           git push origin main --force
