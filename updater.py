@@ -1,6 +1,5 @@
 import os
 import json
-import pandas as pd
 import xarray as xr
 import numpy as np
 import cdsapi
@@ -8,45 +7,21 @@ import ssl
 import urllib3
 from datetime import datetime, timedelta
 
-# --- 0. GÜVENLİK ---
+# --- SSL VE GÜVENLİK ---
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- 1. AYARLAR ---
+# --- AYARLAR ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
 TOKEN = os.environ.get("CDS_TOKEN")
 c = cdsapi.Client(url=URL, key=TOKEN, verify=False)
 
-# 5 gün geriye gidiyoruz (Garanti Veri)
-target_date = datetime.now() - timedelta(days=6) # 6 gün yaptık daha garanti olsun
+# Tarih Ayarı: 7 gün geriye çekiyoruz (En garanti veri)
+target_date = datetime.now() - timedelta(days=7)
 current_year = str(target_date.year)
 current_month = target_date.strftime('%m')
-current_days = [target_date.strftime('%d')]
+current_day = target_date.strftime('%d')
 
-def fetch_data():
-    print(f"Veri çekiliyor: {target_date.strftime('%Y-%m-%d')}")
-    try:
-        # Zaman aşımını (timeout) artırıyoruz
-        c.retrieve(
-            'reanalysis-era5-single-levels',
-            {
-                'product_type': 'reanalysis',
-                'variable': ['2m_temperature', 'total_precipitation', 'potential_evaporation', 'volumetric_soil_water_layer_1', '10m_wind_speed'],
-                'year': [current_year],
-                'month': [current_month],
-                'day': current_days,
-                'time': ['00:00', '12:00'], # Hızlanmak için 2 zaman dilimine düşürdük
-                'area': [42, 26, 36, 45],
-                'format': 'netcdf',
-            },
-            'latest_data.nc'
-        )
-        return xr.open_dataset('latest_data.nc')
-    except Exception as e:
-        print(f"COPERNICUS HATASI: {e}")
-        return None
-
-# --- 81 İL LİSTESİ (Buraya senin updater.py'deki iller_koordinat listeni yapıştır) ---
 iller_koordinat = {
     'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
     'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
@@ -77,23 +52,57 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
-def create_fallback_json():
-    # Eğer veri çekilemezse sistemin çökmemesi için boş/eski format bir dosya oluşturur
-    print("Veri çekilemediği için yedek JSON oluşturuluyor...")
-    results = {il: {'don': 0.0, 'don_seviye': 'VERİ YOK', 'kuraklik': 0.0, 'kuraklik_seviye': 'VERİ YOK', 'nemi': 0.0, 'nemi_seviye': 'VERİ YOK', 'ruzgar': 0.0, 'ruzgar_seviye': 'VERİ YOK'} for il in iller_koordinat}
-    with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+def run():
+    print(f"Tarih denemesi: {current_year}-{current_month}-{current_day}")
+    try:
+        c.retrieve(
+            'reanalysis-era5-single-levels',
+            {
+                'product_type': 'reanalysis',
+                'variable': ['2m_temperature', 'total_precipitation', 'volumetric_soil_water_layer_1', '10m_wind_speed'],
+                'year': [current_year],
+                'month': [current_month],
+                'day': [current_day],
+                'time': ['12:00'], # Sadece öğlen verisini çekerek sunucuyu yormuyoruz
+                'area': [42, 26, 36, 45],
+                'format': 'netcdf',
+            },
+            'data.nc'
+        )
+        ds = xr.open_dataset('data.nc')
+        results = {}
+
+        for il, (lat, lon) in iller_koordinat.items():
+            point = ds.sel(latitude=lat, longitude=lon, method='nearest')
+            
+            # Değerleri alıyoruz
+            t2m = float(point['t2m']) - 273.15
+            tp = float(point['tp']) * 1000
+            swvl1 = float(point['swvl1']) * 100 # Yüzdelik tahmin
+            si10 = float(point['si10'])
+            
+            # Basit Risk Hesaplama
+            don = round(np.clip((0 - t2m) * 20, 0, 100), 1)
+            ruzgar = round(np.clip(si10 * 5, 0, 100), 1)
+            kuraklik = round(np.clip(20 - tp, 0, 100), 1)
+
+            results[il] = {
+                'don': don, 'don_seviye': 'RİSKLİ' if don > 50 else 'DÜŞÜK',
+                'kuraklik': kuraklik, 'kuraklik_seviye': 'YÜKSEK' if kuraklik > 70 else 'ORTA',
+                'nemi': round(swvl1, 1), 'nemi_seviye': 'İDEAL' if 20 < swvl1 < 60 else 'KRİTİK',
+                'ruzgar': ruzgar, 'ruzgar_seviye': 'FIRTINA' if ruzgar > 60 else 'SESSİZ'
+            }
+        
+        with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        print("BAŞARILI: Veriler JSON'a yazıldı.")
+
+    except Exception as e:
+        print(f"HATA: {e}")
+        # Hata olsa bile dosyayı boş bırakma, "Sistem Meşgul" mesajı üret
+        fallback = {il: {'don': 0, 'don_seviye': 'MEŞGUL', 'kuraklik': 0, 'kuraklik_seviye': 'MEŞGUL', 'nemi': 0, 'nemi_seviye': 'MEŞGUL', 'ruzgar': 0, 'ruzgar_seviye': 'MEŞGUL'} for il in iller_koordinat}
+        with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
+            json.dump(fallback, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    ds = fetch_data()
-    if ds:
-        # (Burada senin calculate_risks ve create_json fonksiyonlarını çağırıyoruz)
-        # Eğer bu fonksiyonlar hata verirse create_fallback_json() çalışsın
-        try:
-            from updater import calculate_risks, create_json
-            d, k, y, n, r = calculate_risks(ds)
-            create_json(d, k, y, n, r)
-        except:
-            create_fallback_json()
-    else:
-        create_fallback_json()
+    run()
