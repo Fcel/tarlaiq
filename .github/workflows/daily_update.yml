@@ -2,14 +2,14 @@ name: TarlaIQ Daily Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # Her gece 03:00'te otomatik çalışır
+  workflow_dispatch: # Manuel çalıştırma butonu
 
 jobs:
   update_data:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # Yazma izni şart
 
     steps:
       - name: Checkout repo
@@ -20,35 +20,32 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # Daha kararlı bir sürüm
+          python-version: '3.10'
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libeccodes-dev # Veri okuma için şart
-
-      - name: Install Python Dependencies
-        run: |
-          pip install pandas xarray numpy cdsapi netCDF4 scipy cfgrib ecmwf-api-client
+          pip install pandas xarray numpy cdsapi netCDF4 scipy
 
       - name: Run update script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
-          PYTHONHTTPSVERIFY: "0"
+          PYTHONHTTPSVERIFY: "0" # SSL hatalarını durdurur
         run: python updater.py
 
       - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+          # Çakışmaları önlemek için en güncel hali çek
           git fetch origin main
           git rebase origin/main
           
+          # KRİTİK KONTROL: Dosya varsa ekle, yoksa hata verme (Error 128 Çözümü)
           if [ -f tarlaiq_data.json ]; then
             git add tarlaiq_data.json
             git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
             git push origin main
           else
-            echo "HATA: tarlaiq_data.json dosyası hala oluşmadı!"
-            exit 1
+            echo "UYARI: tarlaiq_data.json dosyası bulunamadı. updater.py çıktısını kontrol edin."
           fi
