@@ -11,3 +11,12 @@ streamlit
 pandas
 folium
 streamlit-folium
+streamlit
+pandas
+numpy
+xarray
+netCDF4
+cdsapi>=0.7.0
+folium
+streamlit-folium
+matplotlib
