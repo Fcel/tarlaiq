@@ -25,7 +25,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install pandas xarray numpy cdsapi netCDF4 scipy
+          pip install --upgrade cdsapi # Kütüphaneyi en sona zorla
+          pip install pandas xarray numpy netCDF4 scipy
 
       # KRİTİK ADIM: Eski dosyayı robotun önünden kaldırıyoruz
       - name: Pre-clean old data
