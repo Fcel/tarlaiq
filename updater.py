@@ -7,21 +7,30 @@ import ssl
 import urllib3
 from datetime import datetime, timedelta
 
-# --- SSL VE GÜVENLİK ---
+# --- 0. GÜVENLİK VE SSL AYARI ---
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- AYARLAR ---
+# --- 1. AYARLAR VE API (ZAMAN AŞIMI ARTIRILDI) ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
 TOKEN = os.environ.get("CDS_TOKEN")
-c = cdsapi.Client(url=URL, key=TOKEN, verify=False)
 
-# Tarih Ayarı: 7 gün geriye çekiyoruz (En garanti veri)
+# Copernicus'a "Sabırlı ol" talimatı veriyoruz
+c = cdsapi.Client(
+    url=URL, 
+    key=TOKEN, 
+    verify=False,
+    timeout=600,      # 10 dakika boyunca sunucuyu bekler (MEŞGUL hatasını önler)
+    retry_max=10      # Sunucu hata verirse 10 kez tekrar dener
+)
+
+# Tarih Ayarı: 7 gün geriye çekiyoruz (En garanti veri aralığı)
 target_date = datetime.now() - timedelta(days=7)
 current_year = str(target_date.year)
 current_month = target_date.strftime('%m')
 current_day = target_date.strftime('%d')
 
+# --- 2. 81 İL KOORDİNATLARI ---
 iller_koordinat = {
     'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
     'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
@@ -52,9 +61,11 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
-def run():
-    print(f"Tarih denemesi: {current_year}-{current_month}-{current_day}")
+# --- 3. İŞLEME VE ANALİZ ---
+def run_process():
+    print(f"Hedef Veri Tarihi: {target_date.strftime('%Y-%m-%d')}")
     try:
+        print("Copernicus Beta'ya bağlanılıyor (Bu işlem 2-5 dakika sürebilir)...")
         c.retrieve(
             'reanalysis-era5-single-levels',
             {
@@ -63,46 +74,52 @@ def run():
                 'year': [current_year],
                 'month': [current_month],
                 'day': [current_day],
-                'time': ['12:00'], # Sadece öğlen verisini çekerek sunucuyu yormuyoruz
+                'time': ['12:00'], 
                 'area': [42, 26, 36, 45],
                 'format': 'netcdf',
             },
-            'data.nc'
+            'latest_data.nc'
         )
-        ds = xr.open_dataset('data.nc')
+        
+        ds = xr.open_dataset('latest_data.nc')
         results = {}
 
-        for il, (lat, lon) in iller_koordinat.items():
-            point = ds.sel(latitude=lat, longitude=lon, method='nearest')
-            
-            # Değerleri alıyoruz
-            t2m = float(point['t2m']) - 273.15
-            tp = float(point['tp']) * 1000
-            swvl1 = float(point['swvl1']) * 100 # Yüzdelik tahmin
-            si10 = float(point['si10'])
-            
-            # Basit Risk Hesaplama
-            don = round(np.clip((0 - t2m) * 20, 0, 100), 1)
-            ruzgar = round(np.clip(si10 * 5, 0, 100), 1)
-            kuraklik = round(np.clip(20 - tp, 0, 100), 1)
+        def get_level(skor):
+            if skor >= 75: return 'KRİTİK'
+            elif skor >= 45: return 'YÜKSEK'
+            elif skor >= 20: return 'ORTA'
+            else: return 'DÜŞÜK'
 
-            results[il] = {
-                'don': don, 'don_seviye': 'RİSKLİ' if don > 50 else 'DÜŞÜK',
-                'kuraklik': kuraklik, 'kuraklik_seviye': 'YÜKSEK' if kuraklik > 70 else 'ORTA',
-                'nemi': round(swvl1, 1), 'nemi_seviye': 'İDEAL' if 20 < swvl1 < 60 else 'KRİTİK',
-                'ruzgar': ruzgar, 'ruzgar_seviye': 'FIRTINA' if ruzgar > 60 else 'SESSİZ'
-            }
+        for il, (lat, lon) in iller_koordinat.items():
+            try:
+                point = ds.sel(latitude=lat, longitude=lon, method='nearest')
+                t2m = float(point['t2m']) - 273.15
+                tp = float(point['tp']) * 1000
+                swvl1 = float(point['swvl1']) * 100
+                si10 = float(point['si10'])
+                
+                don = round(np.clip((0 - t2m) * 20, 0, 100), 1)
+                ruzgar = round(np.clip(si10 * 5, 0, 100), 1)
+                kuraklik = round(np.clip(20 - tp, 0, 100), 1)
+
+                results[il] = {
+                    'don': don, 'don_seviye': get_level(don),
+                    'kuraklik': kuraklik, 'kuraklik_seviye': get_level(kuraklik),
+                    'nemi': round(swvl1, 1), 'nemi_seviye': "İDEAL" if 25 < swvl1 < 60 else "DİKKAT",
+                    'ruzgar': ruzgar, 'ruzgar_seviye': "FIRTINA" if ruzgar > 60 else "GÜVENLİ"
+                }
+            except: continue
         
         with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
-        print("BAŞARILI: Veriler JSON'a yazıldı.")
+        print("BAŞARILI: Veriler güncellendi.")
 
     except Exception as e:
-        print(f"HATA: {e}")
-        # Hata olsa bile dosyayı boş bırakma, "Sistem Meşgul" mesajı üret
+        print(f"KRİTİK HATA: {e}")
+        # Hata olsa bile dosyayı MEŞGUL modunda oluştur ki Action kırmızı yanmasın
         fallback = {il: {'don': 0, 'don_seviye': 'MEŞGUL', 'kuraklik': 0, 'kuraklik_seviye': 'MEŞGUL', 'nemi': 0, 'nemi_seviye': 'MEŞGUL', 'ruzgar': 0, 'ruzgar_seviye': 'MEŞGUL'} for il in iller_koordinat}
         with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
             json.dump(fallback, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    run()
+    run_process()
