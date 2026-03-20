@@ -13,7 +13,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- KONFİGÜRASYON ---
-URL = "https://cds-beta.climate.copernicus.eu/api"
+URL = "https://cds.climate.copernicus.eu/api"
 TOKEN = os.environ.get("CDS_TOKEN")
 
 if not TOKEN:
