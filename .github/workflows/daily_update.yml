@@ -8,9 +8,9 @@ on:
 jobs:
   update_data:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60 # Copernicus Beta bazen yavaştır, süre tanıdık
     permissions:
-      contents: write
+      contents: write # GitHub'ın dosyayı içeri yazması için ŞART
 
     steps:
       - name: Checkout repo
@@ -28,23 +28,16 @@ jobs:
           pip install --upgrade cdsapi
           pip install pandas xarray numpy netCDF4 scipy
 
-      - name: Pre-clean
-        run: |
-          rm -f tarlaiq_data.json
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
       - name: Run update script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
         run: python updater.py
 
-      - name: Commit and Push
+      - name: Commit and Push changes
         run: |
-          if [ -f tarlaiq_data.json ]; then
-            git add tarlaiq_data.json
-            git commit -m "Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-            # Önce GitHub'daki son hali al, sonra kendi verini ekle ve gönder
-            git pull --rebase origin main
-            git push origin main
-          fi
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add tarlaiq_data.json
+          git commit -m "Veri Güncelleme: $(date)" || echo "Değişiklik yok"
+          git pull --rebase origin main # Çakışmaları önlemek için önce çek
+          git push origin main # Sonra zorla gönder
