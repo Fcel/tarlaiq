@@ -2,13 +2,13 @@ name: TarlaIQ Daily Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # Her gece 03:00'te otomatik çalışır
+  workflow_dispatch: # Manuel çalıştırma butonu
 
 jobs:
   update_data:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 30 # Sunucu kuyruğu için 30 dakika süre tanıdık
     permissions:
       contents: write
 
@@ -25,12 +25,13 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install --upgrade cdsapi  # En son sürüm Beta desteği için şart
+          # 404 HATASINI ÇÖZEN EN KRİTİK KOMUT:
+          pip install --upgrade cdsapi 
           pip install pandas xarray numpy netCDF4 scipy
 
-      # KRİTİK ADIM: Eski dosyayı robotun önünden kaldırıyoruz
       - name: Pre-clean old data
         run: |
+          # Git çakışmalarını önlemek için eski dosyayı siliyoruz
           rm -f tarlaiq_data.json
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -43,11 +44,12 @@ jobs:
 
       - name: Commit and Push changes
         run: |
-          # 1. Yeni oluşan dosyayı ekle
-          git add tarlaiq_data.json
-          
-          # 2. Eğer dosya değişmişse veya yeni oluşmuşsa kaydet
-          git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-          
-          # 3. Direkt ana kola (main) zorla gönder
-          git push origin main --force
+          # Dosya oluştuysa ekle ve zorla gönder
+          if [ -f tarlaiq_data.json ]; then
+            git add tarlaiq_data.json
+            git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
+            git push origin main --force
+          else
+            echo "HATA: tarlaiq_data.json dosyası oluşturulamadı!"
+            exit 1
+          fi
