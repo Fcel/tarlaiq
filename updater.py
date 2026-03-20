@@ -6,7 +6,7 @@ import numpy as np
 import cdsapi
 import ssl
 import urllib3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- 0. GÜVENLİK AYARI (SSL HATASINI ÇÖZER) ---
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -19,17 +19,19 @@ TOKEN = os.environ.get("CDS_TOKEN")
 if not TOKEN:
     raise ValueError("CDS_TOKEN bulunamadı! GitHub Secrets ayarlarını kontrol edin.")
 
-# verify=False ekleyerek SSL hatasını bypass ediyoruz
 c = cdsapi.Client(url=URL, key=TOKEN, verify=False)
 
-# Tarih Ayarları
-now = datetime.now()
-current_year = str(now.year)
-current_month = now.strftime('%m')
-day_limit = now.day if now.day > 1 else 2
-current_days = [f"{i:02d}" for i in range(1, day_limit)]
+# --- 2. TARİH AYARLARI (KRİTİK: 5 GÜN GERİYE GİDİYORUZ) ---
+# ERA5 verileri yaklaşık 5 gün gecikmeli yayınlanır. 
+# "Bugünü" istersen veri bulamaz ve dosya oluşturamaz.
+target_date = datetime.now() - timedelta(days=5)
+current_year = str(target_date.year)
+current_month = target_date.strftime('%m')
+current_days = [target_date.strftime('%d')]
 
-# --- 2. 81 İL KOORDİNAT VERİTABANI ---
+print(f"Sistem Çalışıyor... Hedef Veri Tarihi: {target_date.strftime('%Y-%m-%d')}")
+
+# --- 3. 81 İL KOORDİNAT VERİTABANI ---
 iller_koordinat = {
     'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
     'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
@@ -60,9 +62,9 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
-# --- 3. VERİ ÇEKME ---
+# --- 4. VERİ ÇEKME ---
 def fetch_data():
-    print(f"Copernicus'tan veriler çekiliyor (Ay: {current_month}, Günler: {current_days})")
+    print("Copernicus'tan veri indiriliyor...")
     try:
         c.retrieve(
             'reanalysis-era5-single-levels',
@@ -86,13 +88,13 @@ def fetch_data():
         )
         return xr.open_dataset('latest_data.nc')
     except Exception as e:
-        print(f"VERİ ÇEKME HATASI: {e}")
+        print(f"VERİ ÇEKME HATASI (Tarih kaynaklı olabilir): {e}")
         return None
 
-# --- 4. RİSK HESAPLAMA ---
+# --- 5. RİSK HESAPLAMA ---
 def calculate_risks(ds):
     if ds is None: return None, None, None, None, None
-    print("Risk hesaplamaları yapılıyor...")
+    print("Tarımsal analizler yapılıyor...")
 
     # Don Skoru
     temp = ds['t2m'] - 273.15
@@ -112,15 +114,15 @@ def calculate_risks(ds):
     wind_raw = ds['si10'].max(dim='time')
     ruzgar_map = np.clip(wind_raw * 6.6, 0, 100)
 
-    # Yağış Skoru
+    # Yağış Skoru (Ekran için yardımcı)
     yagis_map = np.clip(yagis.mean(dim='time') * 14, 0, 100)
 
     return don_map, kuraklik_map, yagis_map, nemi_map, ruzgar_map
 
-# --- 5. JSON OLUŞTURMA ---
+# --- 6. JSON OLUŞTURMA ---
 def create_json(don, kurak, yagis, nemi, ruzgar):
     if don is None:
-        print("Hesaplanan veri yok, JSON oluşturulmadı.")
+        print("HATA: Hesaplanan veri seti boş!")
         return
     
     results = {}
@@ -144,19 +146,15 @@ def create_json(don, kurak, yagis, nemi, ruzgar):
                 'kuraklik': round(k_val, 1), 'kuraklik_seviye': get_level(k_val),
                 'yagis': round(y_val, 1), 'yagis_seviye': get_level(y_val),
                 'nemi': round(n_val, 1), 'nemi_seviye': "İDEAL" if 25 < n_val < 65 else "KRİTİK",
-                'ruzgar': round(r_val, 1), 'ruzgar_seviye': "GÜVENLİ" if r_val < 35 else "FIRTINA"
+                'ruzgar': round(r_val, 1), 'ruzgar_seviye': "GÜVENLİ" if r_val < 35 else "RİSKLİ"
             }
-        except Exception as e:
+        except Exception:
             continue
     
-    output_path = 'tarlaiq_data.json'
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     
-    if os.path.exists(output_path):
-        print(f"BAŞARILI: {output_path} dosyası oluşturuldu.")
-    else:
-        print("HATA: Dosya yazılamadı!")
+    print("İŞLEM TAMAMLANDI: tarlaiq_data.json başarıyla güncellendi.")
 
 if __name__ == "__main__":
     dataset = fetch_data()
@@ -164,4 +162,4 @@ if __name__ == "__main__":
         d, k, y, n, r = calculate_risks(dataset)
         create_json(d, k, y, n, r)
     else:
-        print("Sistem veri çekemediği için durduruldu.")
+        print("KRİTİK HATA: Veri çekilemedi, tarihleri veya bağlantıyı kontrol edin.")
