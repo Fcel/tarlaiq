@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install --upgrade cdsapi # Kütüphaneyi en sona zorla
+          pip install --upgrade cdsapi  # En son sürüm Beta desteği için şart
           pip install pandas xarray numpy netCDF4 scipy
 
       # KRİTİK ADIM: Eski dosyayı robotun önünden kaldırıyoruz
