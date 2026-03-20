@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # Robotun dosyayı yazabilmesi için şart
+  contents: write  # Bu satır yukarıdaki ayarla birlikte çalışır
 
 jobs:
   update_data:
@@ -38,4 +38,4 @@ jobs:
           git config --local user.name "GitHub Action"
           git add tarlaiq_data.json
           git commit -m "Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-          git push origin main --force # Zorla içeri sokuyoruz
+          git push origin main --force # Yetkiyi aldık, şimdi zorla gönderiyoruz
