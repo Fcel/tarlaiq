@@ -110,6 +110,8 @@ def run_process():
 
     except Exception as e:
         print(f"HATA OLUŞTU: {e}")
+        raise SystemExit(1)
+
 
 if __name__ == "__main__":
     run_process()
