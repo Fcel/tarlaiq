@@ -2,93 +2,133 @@ import streamlit as st
 import pandas as pd
 import json
 import os
-import cdsapi
+import folium
+from streamlit_folium import st_folium
 
 # --- SAYFA AYARLARI ---
-st.set_page_config(
-    page_title="TarlaIQ | Dr. Fatih",
-    page_icon="🌱",
-    layout="wide"
-)
+st.set_page_config(page_title="TarlaIQ | Dr. Fatih", page_icon="🌱", layout="wide")
 
-# --- GÜVENLİK: YENİ CDS BETA TOKEN KULLANIMI ---
-# Streamlit Secrets panelinden CDS_TOKEN adıyla okunur
-try:
-    if "CDS_TOKEN" in st.secrets:
-        TOKEN = st.secrets["CDS_TOKEN"]
-        # Yeni Beta URL'si
-        URL = "https://cds-beta.climate.copernicus.eu/api"
-        # Client kurulumu (İleride otomatik güncelleme yaparsan lazım olacak)
-        c = cdsapi.Client(url=URL, key=TOKEN)
-    else:
-        st.sidebar.warning("⚠️ CDS_TOKEN Secrets panelinde bulunamadı.")
-except Exception as e:
-    st.sidebar.error(f"Bağlantı Ayarı Hatası: {e}")
+# --- KOORDİNAT VERİTABANI (Gömülü) ---
+iller_koordinat = {
+    'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
+    'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
+    'Antalya': (36.9, 30.7), 'Artvin': (41.2, 41.8), 'Aydın': (37.8, 27.8),
+    'Balıkesir': (39.6, 27.9), 'Bilecik': (40.1, 29.9), 'Bingöl': (38.9, 40.5),
+    'Bitlis': (38.4, 42.1), 'Bolu': (40.7, 31.6), 'Burdur': (37.7, 30.3),
+    'Bursa': (40.2, 29.1), 'Çanakkale': (40.1, 26.4), 'Çankırı': (40.6, 33.6),
+    'Çorum': (40.5, 34.9), 'Denizli': (37.8, 29.1), 'Diyarbakır': (37.9, 40.2),
+    'Edirne': (41.7, 26.6), 'Elazığ': (38.7, 39.2), 'Erzincan': (39.7, 39.5),
+    'Erzurum': (39.9, 41.3), 'Eskişehir': (39.8, 30.5), 'Gaziantep': (37.1, 37.4),
+    'Giresun': (40.9, 38.4), 'Gümüşhane': (40.5, 39.5), 'Hakkari': (37.6, 43.7),
+    'Hatay': (36.2, 36.2), 'Isparta': (37.8, 30.6), 'Mersin': (36.8, 34.6),
+    'İstanbul': (41.0, 29.0), 'İzmir': (38.4, 27.1), 'Kars': (40.6, 43.1),
+    'Kastamonu': (41.4, 33.8), 'Kayseri': (38.7, 35.5), 'Kırklareli': (41.7, 27.2),
+    'Kırşehir': (39.1, 34.2), 'Kocaeli': (40.8, 29.9), 'Konya': (37.9, 32.5),
+    'Kütahya': (39.4, 29.0), 'Malatya': (38.4, 38.3), 'Manisa': (38.6, 27.4),
+    'Kahramanmaraş': (37.6, 36.9), 'Mardin': (37.3, 40.7), 'Muğla': (37.2, 28.4),
+    'Muş': (38.7, 41.5), 'Nevşehir': (38.6, 34.7), 'Niğde': (37.9, 34.7),
+    'Ordu': (40.9, 37.9), 'Rize': (41.0, 40.5), 'Sakarya': (40.7, 30.4),
+    'Samsun': (41.3, 36.3), 'Siirt': (37.9, 41.9), 'Sinop': (42.0, 35.2),
+    'Sivas': (39.7, 37.0), 'Tekirdağ': (40.9, 27.5), 'Tokat': (40.3, 36.6),
+    'Trabzon': (41.0, 39.7), 'Tunceli': (39.1, 39.5), 'Şanlıurfa': (37.2, 38.8),
+    'Uşak': (38.7, 29.4), 'Van': (38.5, 43.4), 'Yozgat': (39.8, 34.8),
+    'Zonguldak': (41.5, 31.8), 'Aksaray': (38.4, 34.0), 'Bayburt': (40.3, 40.2),
+    'Karaman': (37.2, 33.2), 'Kırıkkale': (39.8, 33.5), 'Batman': (37.9, 41.1),
+    'Şırnak': (37.5, 42.5), 'Bartın': (41.6, 32.3), 'Ardahan': (41.1, 42.7),
+    'Iğdır': (39.9, 44.0), 'Yalova': (40.7, 29.3), 'Karabük': (41.2, 32.6),
+    'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
+}
 
 # --- VERİ YÜKLEME ---
 @st.cache_data
-def load_tarlaiq_data():
-    # GitHub'daki json dosyasını okur
+def load_data():
     if os.path.exists('tarlaiq_data.json'):
         with open('tarlaiq_data.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     return None
 
-data = load_tarlaiq_data()
+data = load_data()
 
-# --- ARAYÜZ TASARIMI ---
-st.title("🌱 TarlaIQ: Akıllı Tarımsal Risk Platformu")
-st.markdown("### Veriye Dayalı Karar Destek Sistemi")
+# --- ARAYÜZ ---
+st.title("🌱 TarlaIQ: İnteraktif Tarımsal Risk Analizi")
+st.markdown("### Dr. Fatih Celik | Karar Destek Sistemi")
 
 if data:
     iller = sorted(list(data.keys()))
     
-    # Üst Bölüm: Seçim ve Ana Skorlar
+    # Üst Bölüm: Metrikler
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
-        st.info("📍 Analiz edilecek ili seçin:")
-        secilen_il = st.selectbox("", iller, index=iller.index("Gümüşhane") if "Gümüşhane" in iller else 0)
+        secilen_il = st.selectbox("📍 İl seçiniz:", iller, 
+                                  index=iller.index("Gümüşhane") if "Gümüşhane" in iller else 0)
     
     v = data[secilen_il]
     
     with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
-    
     with col_kurak:
         st.metric("Kuraklık Skoru", f"%{v['kuraklik']}", v['kuraklik_seviye'], delta_color="inverse")
-        
     with col_yagis:
         st.metric("Yağış Skoru", v['yagis'], v['yagis_seviye'])
 
     st.divider()
 
-    # --- DETAYLI TABLO VE ANALİZ ---
-    tab1, tab2 = st.tabs(["📊 Risk Sıralaması", "ℹ️ Proje Hakkında"])
+    # --- İNTERAKTİF HARİTA ---
+    st.subheader("🗺️ Türkiye Tarımsal Risk Haritası")
     
-    with tab1:
-        st.subheader("81 İl Risk Veritabanı")
+    # Haritayı oluştur (Türkiye merkezli)
+    m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
+
+    for il_adi, skorlar in data.items():
+        if il_adi in iller_koordinat:
+            coords = iller_koordinat[il_adi]
+            
+            # Don riskine göre renk belirleme
+            if skorlar['don'] >= 25: color = 'darkred'
+            elif skorlar['don'] >= 15: color = 'orange'
+            else: color = 'green'
+            
+            # Popup İçeriği
+            popup_text = f"""
+            <div style='font-family: Arial; width: 150px;'>
+                <h4 style='margin-bottom:5px;'>{il_adi}</h4>
+                <hr style='margin:5px 0;'>
+                <b>Don:</b> %{skorlar['don']}<br>
+                <b>Kuraklık:</b> %{skorlar['kuraklik']}<br>
+                <b>Yağış:</b> {skorlar['yagis']}
+            </div>
+            """
+            
+            folium.CircleMarker(
+                location=coords,
+                radius=7,
+                popup=folium.Popup(popup_text, max_width=200),
+                tooltip=il_adi,
+                color=color,
+                fill=True,
+                fill_opacity=0.7
+            ).add_to(m)
+
+    # Haritayı ekrana bas
+    st_folium(m, width="100%", height=500)
+
+    # --- TABLOLAR VE DİĞER HARİTALAR ---
+    st.divider()
+    tab_list, tab_don, tab_kurak = st.tabs(["📊 Veri Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
+    
+    with tab_list:
         df = pd.DataFrame.from_dict(data, orient='index').reset_index()
         df.columns = ['İl', 'Don Skoru', 'Don Seviyesi', 'Kuraklık Skoru', 'Kuraklık Seviyesi', 'Yağış Skoru', 'Yağış Seviyesi']
-        
-        # Filtreleme veya Sıralama
         st.dataframe(df.sort_values('Don Skoru', ascending=False), use_container_width=True, hide_index=True)
 
-    with tab2:
-        st.write(f"""
-        **TarlaIQ**, Dr. Fatih tarafından geliştirilen bir tarımsal izleme platformudur.
-        - **Veri Kaynağı:** Copernicus ERA5 Reanalysis (Yüksek Çözünürlüklü Atmosfer Verileri)
-        - **Kapsam:** Türkiye geneli 81 ilin iklimsel risk analizi.
-        - **Teknoloji:** Python, Streamlit ve CDS API (Modernised Beta).
-        """)
+    with tab_don:
+        if os.path.exists('don_haritasi.png'):
+            st.image('don_haritasi.png', caption="Statik Don Risk Analizi", use_container_width=True)
+
+    with tab_kurak:
+        if os.path.exists('kuraklik_haritasi.png'):
+            st.image('kuraklik_haritasi.png', caption="Statik Kuraklık Analizi", use_container_width=True)
 
 else:
-    st.error("❌ Veri dosyası (tarlaiq_data.json) bulunamadı! Lütfen dosyayı GitHub'a yükleyin.")
-
-# --- YAN MENÜ ---
-st.sidebar.image("https://www.tubitak.gov.tr/sites/default/files/logo_tubitak.png", width=100) # Örnek logo
-st.sidebar.markdown(f"## 🛠️ Panel")
-st.sidebar.write(f"**Aktif İl:** {secilen_il if data else 'Seçilmedi'}")
-st.sidebar.write("---")
-st.sidebar.write("👨‍🔬 **Dr. Fatih CELIK**")
-st.sidebar.caption("Tarımsal veri bilimi ve yapay zeka çözümleri.")
+    st.error("Veri bulunamadı. Lütfen JSON dosyasını kontrol edin.")
