@@ -48,33 +48,33 @@ def load_data():
 
 data = load_data()
 
-# --- HAFIZA YÖNETİMİ (Session State) ---
-# Selectbox ve Harita arasındaki bağı kuran ana değişken
-if 'secilen_il' not in st.session_state:
-    st.session_state['secilen_il'] = "Gümüşhane"
+# --- SİSTEM BAŞLATMA (Session State) ---
+# 'il_secimi' anahtarını Selectbox ile doğrudan bağlıyoruz
+if 'il_secimi' not in st.session_state:
+    st.session_state.il_secimi = "Gümüşhane"
+
+# --- FONKSİYON: Harita Tıklandığında Tetiklenecek ---
+def sync_selection():
+    if st.session_state.map_output and st.session_state.map_output.get("last_object_clicked_tooltip"):
+        clicked_il = st.session_state.map_output["last_object_clicked_tooltip"]
+        if clicked_il != st.session_state.il_secimi:
+            st.session_state.il_secimi = clicked_il
+            # rerun() gerekebilir ama session_state değiştiği için Selectbox otomatik güncellenir
 
 st.title("🌱 TarlaIQ: Akıllı Tarımsal Risk Platformu")
 
 if data:
     iller = sorted(list(data.keys()))
 
-    # --- ÜST PANEL (METRİKLER) ---
+    # --- ÜST PANEL ---
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
-        # ÖNEMLİ: Selectbox'ın indexini session_state'den alıyoruz
-        # Manuel değişimde session_state'i güncellemek için on_change fonksiyonu eklenebilir ama index takibi yeterli
-        current_il = st.selectbox(
-            "📍 İl seçiniz:", 
-            iller, 
-            index=iller.index(st.session_state['secilen_il']),
-            key="il_kutusu"
-        )
-        # Kutudan elle seçilirse hafızayı güncelle
-        st.session_state['secilen_il'] = current_il
+        # Selectbox 'il_secimi' anahtarına kilitlendi
+        secilen_il = st.selectbox("📍 İl Seçiniz:", iller, key="il_secimi")
 
-    # Rakamları session_state'deki güncel ile göre çek
-    v = data[st.session_state['secilen_il']]
+    # Veriyi seçilen ile göre al
+    v = data[secilen_il]
     
     with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
@@ -85,8 +85,7 @@ if data:
 
     st.divider()
 
-    # --- İNTERAKTİF HARİTA ---
-    # Haritayı oluştur
+    # --- HARİTA ---
     m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
 
     for il_adi, skorlar in data.items():
@@ -95,23 +94,22 @@ if data:
             folium.CircleMarker(
                 location=iller_koordinat[il_adi],
                 radius=10,
-                tooltip=il_adi, # Harita takibi için tooltip kullanıyoruz
+                tooltip=il_adi, 
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
-    # Haritayı çiz ve çıktıyı al
-    map_output = st_folium(m, width="100%", height=500, key="ana_harita")
+    # Haritayı çiziyoruz ve sonucunu bir session_state değişkenine atıyoruz
+    # 'on_change' veya manuel kontrol için harita çıktısını yakala
+    st.session_state.map_output = st_folium(m, width="100%", height=500, key="ana_harita")
 
-    # --- SENKRONİZASYON TETİKLEYİCİSİ ---
-    # Eğer haritadaki bir noktaya tıklanırsa
-    if map_output and map_output.get("last_object_clicked_tooltip"):
-        tıklanan_il = map_output["last_object_clicked_tooltip"]
-        # Eğer tıklanan il, hafızadaki ilden farklıysa hafızayı güncelle ve sayfayı tazele
-        if tıklanan_il != st.session_state['secilen_il']:
-            st.session_state['secilen_il'] = tıklanan_il
-            st.rerun() # Sayfa yeniden yüklenecek ve selectbox indexi yeni ile göre oluşacak
+    # --- SENKRONİZASYON KONTROLÜ ---
+    if st.session_state.map_output and st.session_state.map_output.get("last_object_clicked_tooltip"):
+        new_il = st.session_state.map_output["last_object_clicked_tooltip"]
+        if new_il != st.session_state.il_secimi:
+            st.session_state.il_secimi = new_il
+            st.rerun()
 
     st.divider()
 
@@ -131,4 +129,4 @@ if data:
         if os.path.exists('kuraklik_haritasi.png'):
             st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Analizi", use_container_width=True)
 else:
-    st.error("Veri bulunamadı.")
+    st.error("Veri dosyası yüklenemedi.")
