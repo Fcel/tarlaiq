@@ -39,6 +39,7 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
+# --- VERİ YÜKLEME ---
 @st.cache_data
 def load_data():
     if os.path.exists('tarlaiq_data.json'):
@@ -48,33 +49,25 @@ def load_data():
 
 data = load_data()
 
-# --- SİSTEM BAŞLATMA (Session State) ---
-# 'il_secimi' anahtarını Selectbox ile doğrudan bağlıyoruz
-if 'il_secimi' not in st.session_state:
-    st.session_state.il_secimi = "Gümüşhane"
-
-# --- FONKSİYON: Harita Tıklandığında Tetiklenecek ---
-def sync_selection():
-    if st.session_state.map_output and st.session_state.map_output.get("last_object_clicked_tooltip"):
-        clicked_il = st.session_state.map_output["last_object_clicked_tooltip"]
-        if clicked_il != st.session_state.il_secimi:
-            st.session_state.il_secimi = clicked_il
-            # rerun() gerekebilir ama session_state değiştiği için Selectbox otomatik güncellenir
+# --- SİSTEM HAFIZASI (Session State) ---
+if 'secilen_il' not in st.session_state:
+    st.session_state.secilen_il = "Gümüşhane"
 
 st.title("🌱 TarlaIQ: Akıllı Tarımsal Risk Platformu")
 
 if data:
     iller = sorted(list(data.keys()))
 
-    # --- ÜST PANEL ---
+    # --- ÜST PANEL (METRİKLER) ---
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
-        # Selectbox 'il_secimi' anahtarına kilitlendi
-        secilen_il = st.selectbox("📍 İl Seçiniz:", iller, key="il_secimi")
+        # Selectbox'ı session_state üzerinden kontrol ediyoruz
+        il_index = iller.index(st.session_state.secilen_il)
+        secilen_il = st.selectbox("📍 İl seçiniz:", iller, index=il_index, key="il_kutu")
+        st.session_state.secilen_il = secilen_il
 
-    # Veriyi seçilen ile göre al
-    v = data[secilen_il]
+    v = data[st.session_state.secilen_il]
     
     with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
@@ -85,7 +78,7 @@ if data:
 
     st.divider()
 
-    # --- HARİTA ---
+    # --- İNTERAKTİF HARİTA ---
     m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
 
     for il_adi, skorlar in data.items():
@@ -94,27 +87,26 @@ if data:
             folium.CircleMarker(
                 location=iller_koordinat[il_adi],
                 radius=10,
-                tooltip=il_adi, 
+                tooltip=il_adi,
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
-    # Haritayı çiziyoruz ve sonucunu bir session_state değişkenine atıyoruz
-    # 'on_change' veya manuel kontrol için harita çıktısını yakala
-    st.session_state.map_output = st_folium(m, width="100%", height=500, key="ana_harita")
+    # Haritayı çiz ve çıktıyı al
+    map_out = st_folium(m, width="100%", height=500, key="ana_harita")
 
-    # --- SENKRONİZASYON KONTROLÜ ---
-    if st.session_state.map_output and st.session_state.map_output.get("last_object_clicked_tooltip"):
-        new_il = st.session_state.map_output["last_object_clicked_tooltip"]
-        if new_il != st.session_state.il_secimi:
-            st.session_state.il_secimi = new_il
+    # Tıklama kontrolü (Haritadan il seçilirse sayfayı tazele)
+    if map_out and map_out.get("last_object_clicked_tooltip"):
+        yeni_il = map_out["last_object_clicked_tooltip"]
+        if yeni_il != st.session_state.secilen_il:
+            st.session_state.secilen_il = yeni_il
             st.rerun()
 
     st.divider()
 
-    # --- ALT SEKMELER ---
-    tab_list, tab_don, tab_kurak = st.tabs(["📊 Veri Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
+    # --- ALT SEKMELER (GÖRSEL ŞÖLEN) ---
+    tab_list, tab_don, tab_kurak = st.tabs(["📊 Risk Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
     
     with tab_list:
         df = pd.DataFrame.from_dict(data, orient='index').reset_index()
@@ -123,10 +115,14 @@ if data:
 
     with tab_don:
         if os.path.exists('don_haritasi.png'):
-            st.image('don_haritasi.png', caption="Türkiye Don Risk Analizi", use_container_width=True)
+            st.image('don_haritasi.png', caption="Türkiye Don Risk Analizi (Heatmap)", use_container_width=True)
+        else:
+            st.info("Don haritası (.png) deponuzda bulunamadı.")
 
     with tab_kurak:
         if os.path.exists('kuraklik_haritasi.png'):
-            st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Analizi", use_container_width=True)
+            st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Analizi (Heatmap)", use_container_width=True)
+        else:
+            st.info("Kuraklık haritası (.png) deponuzda bulunamadı.")
 else:
-    st.error("Veri dosyası yüklenemedi.")
+    st.error("Veri dosyası (tarlaiq_data.json) bulunamadı.")
