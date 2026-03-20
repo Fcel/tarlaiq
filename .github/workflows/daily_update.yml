@@ -1,12 +1,10 @@
 name: TarlaIQ Daily Data Update
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Manuel çalıştırma butonu
 
 permissions:
-  contents: write  # Bu satır yukarıdaki ayarla birlikte çalışır
+  contents: write # GitHub ayarlarında verdiğin izni burada aktif ediyoruz
 
 jobs:
   update_data:
@@ -15,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Tüm geçmişi al ki çakışma olmasın
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,18 +22,22 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install --upgrade cdsapi
-          pip install pandas xarray numpy netCDF4 scipy
+          pip install --upgrade cdsapi xarray numpy netCDF4 scipy
 
       - name: Run update script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
         run: python updater.py
 
-      - name: Commit and Push changes
+      - name: Commit and Force Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add tarlaiq_data.json
-          git commit -m "Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-          git push origin main --force # Yetkiyi aldık, şimdi zorla gönderiyoruz
+          
+          # Eğer dosya değişmişse commit et, değişmemişse hata verme geç
+          git commit -m "Kesin Guncelleme: $(date)" || echo "Degisiklik yok"
+          
+          # Önce uzak sunucudaki (GitHub) hali al, sonra kendi verini zorla üzerine yaz
+          git pull --rebase origin main
+          git push origin main --force
