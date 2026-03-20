@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import os
+import cdsapi
 
 # --- SAYFA AYARLARI ---
 st.set_page_config(
@@ -10,78 +11,84 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- GÜVENLİK: API BİLGİLERİNİ ÇEKME ---
-# Bu bilgiler Streamlit Panelindeki "Secrets" kısmından gelecek
+# --- GÜVENLİK: YENİ CDS BETA TOKEN KULLANIMI ---
+# Streamlit Secrets panelinden CDS_TOKEN adıyla okunur
 try:
-    CDS_UID = st.secrets["CDS_UID"]
-    CDS_API_KEY = st.secrets["CDS_API_KEY"]
-except:
-    st.warning("⚠️ API Anahtarları (Secrets) henüz tanımlanmamış. Yerel veriler kullanılıyor.")
+    if "CDS_TOKEN" in st.secrets:
+        TOKEN = st.secrets["CDS_TOKEN"]
+        # Yeni Beta URL'si
+        URL = "https://cds-beta.climate.copernicus.eu/api"
+        # Client kurulumu (İleride otomatik güncelleme yaparsan lazım olacak)
+        c = cdsapi.Client(url=URL, key=TOKEN)
+    else:
+        st.sidebar.warning("⚠️ CDS_TOKEN Secrets panelinde bulunamadı.")
+except Exception as e:
+    st.sidebar.error(f"Bağlantı Ayarı Hatası: {e}")
 
-# --- VERİ YÜKLEME FONKSİYONU ---
+# --- VERİ YÜKLEME ---
 @st.cache_data
 def load_tarlaiq_data():
-    # Colab'da oluşturup GitHub'a yüklediğin JSON dosyasını okur
+    # GitHub'daki json dosyasını okur
     if os.path.exists('tarlaiq_data.json'):
         with open('tarlaiq_data.json', 'r', encoding='utf-8') as f:
             return json.load(f)
-    else:
-        return None
+    return None
 
-# Veriyi çek
 data = load_tarlaiq_data()
 
 # --- ARAYÜZ TASARIMI ---
 st.title("🌱 TarlaIQ: Akıllı Tarımsal Risk Platformu")
-st.markdown(f"**Geliştirici:** Dr. Fatih | **Veri Kaynağı:** Copernicus ERA5")
+st.markdown("### Veriye Dayalı Karar Destek Sistemi")
 
 if data:
-    # İl listesini hazırla
     iller = sorted(list(data.keys()))
     
-    # Üst Bilgi Kartları için kolonlar
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    # Üst Bölüm: Seçim ve Ana Skorlar
+    col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
-    with col1:
-        secilen_il = st.selectbox("📍 Analiz edilecek ili seçin:", iller, index=iller.index("Gümüşhane") if "Gümüşhane" in iller else 0)
+    with col_secim:
+        st.info("📍 Analiz edilecek ili seçin:")
+        secilen_il = st.selectbox("", iller, index=iller.index("Gümüşhane") if "Gümüşhane" in iller else 0)
     
     v = data[secilen_il]
     
-    with col2:
+    with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
     
-    with col3:
+    with col_kurak:
         st.metric("Kuraklık Skoru", f"%{v['kuraklik']}", v['kuraklik_seviye'], delta_color="inverse")
         
-    with col4:
+    with col_yagis:
         st.metric("Yağış Skoru", v['yagis'], v['yagis_seviye'])
 
     st.divider()
 
-    # --- ANA İÇERİK ---
-    tab1, tab2 = st.tabs(["📊 Risk Detayları", "🗺️ Bölgesel Analiz"])
+    # --- DETAYLI TABLO VE ANALİZ ---
+    tab1, tab2 = st.tabs(["📊 Risk Sıralaması", "ℹ️ Proje Hakkında"])
     
     with tab1:
-        st.subheader(f"{secilen_il} İli İçin Detaylı Analiz")
-        st.write(f"Bu sonuçlar Ocak-Mart 2023/2024 döneminin ortalama atmosferik verilerine dayanmaktadır.")
-        
-        # Tüm illeri tablo olarak göster
+        st.subheader("81 İl Risk Veritabanı")
         df = pd.DataFrame.from_dict(data, orient='index').reset_index()
         df.columns = ['İl', 'Don Skoru', 'Don Seviyesi', 'Kuraklık Skoru', 'Kuraklık Seviyesi', 'Yağış Skoru', 'Yağış Seviyesi']
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        
+        # Filtreleme veya Sıralama
+        st.dataframe(df.sort_values('Don Skoru', ascending=False), use_container_width=True, hide_index=True)
 
     with tab2:
-        st.info("💡 Harita görselleştirmeleri GitHub deponuza eklendikçe burada görünecektir.")
-        # Eğer harita .png dosyaların GitHub'daysa şu kodu aktif edebilirsin:
-        # st.image("don_haritasi.png", caption="Don Risk Haritası")
+        st.write(f"""
+        **TarlaIQ**, Dr. Fatih tarafından geliştirilen bir tarımsal izleme platformudur.
+        - **Veri Kaynağı:** Copernicus ERA5 Reanalysis (Yüksek Çözünürlüklü Atmosfer Verileri)
+        - **Kapsam:** Türkiye geneli 81 ilin iklimsel risk analizi.
+        - **Teknoloji:** Python, Streamlit ve CDS API (Modernised Beta).
+        """)
 
 else:
-    st.error("❌ 'tarlaiq_data.json' dosyası bulunamadı. Lütfen Colab'dan indirdiğiniz dosyayı GitHub deponuza yükleyin.")
+    st.error("❌ Veri dosyası (tarlaiq_data.json) bulunamadı! Lütfen dosyayı GitHub'a yükleyin.")
 
-# --- FOOTER ---
-st.sidebar.markdown("---")
-st.sidebar.success(f"Şu an aktif il: {secilen_il}")
-st.sidebar.info("""
-**TarlaIQ Nedir?**
-Çiftçiler ve tarım paydaşları için iklim verilerini (sıcaklık, yağış, evaporasyon) kullanarak risk skorları üreten bir karar destek sistemidir.
-""")
+# --- YAN MENÜ ---
+st.sidebar.image("https://www.tubitak.gov.tr/sites/default/files/logo_tubitak.png", width=100) # Örnek logo
+st.sidebar.markdown(f"## 🛠️ Panel")
+st.sidebar.write(f"**Aktif İl:** {secilen_il if data else 'Seçilmedi'}")
+st.sidebar.write("---")
+st.sidebar.write("👨‍🔬 **Dr. Fatih CELIK**")
+st.sidebar.caption("Tarımsal veri bilimi ve yapay zeka çözümleri.")
