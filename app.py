@@ -39,6 +39,7 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
+# --- VERİ YÜKLEME ---
 @st.cache_data
 def load_data():
     if os.path.exists('tarlaiq_data.json'):
@@ -48,24 +49,23 @@ def load_data():
 
 data = load_data()
 
-# --- SENKRONİZASYON MANTIĞI ---
-# Eğer hafızada (session_state) seçili bir il yoksa varsayılanı ata
+# --- SİSTEM HAFIZASI (Session State) ---
 if 'secilen_il' not in st.session_state:
     st.session_state.secilen_il = "Gümüşhane"
 
-st.title("🌱 TarlaIQ: Senkronize Risk Analizi")
+st.title("🌱 TarlaIQ: Genişletilmiş Tarımsal Analiz")
+st.markdown("### Dr. Fatih Celik | Karar Destek Sistemi")
 
 if data:
     iller = sorted(list(data.keys()))
 
     # --- ÜST PANEL (METRİKLER) ---
-    col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
+    col_secim, col_don, col_kurak, col_nemi, col_ruzgar = st.columns([1.5, 1, 1, 1, 1])
     
     with col_secim:
-        # Selectbox, session_state'deki il bilgisini kullanır
-        secilen_il = st.selectbox("📍 İl seçiniz:", iller, 
-                                  index=iller.index(st.session_state.secilen_il))
-        st.session_state.secilen_il = secilen_il
+        il_index = iller.index(st.session_state.secilen_il)
+        secilen_il_ui = st.selectbox("📍 İl seçiniz:", iller, index=il_index, key="il_kutu")
+        st.session_state.secilen_il = secilen_il_ui
 
     v = data[st.session_state.secilen_il]
     
@@ -73,8 +73,17 @@ if data:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
     with col_kurak:
         st.metric("Kuraklık Skoru", f"%{v['kuraklik']}", v['kuraklik_seviye'], delta_color="inverse")
-    with col_yagis:
-        st.metric("Yağış Skoru", v['yagis'], v['yagis_seviye'])
+    
+    # Yeni Parametreler (JSON'da henüz yoksa hata vermemesi için kontrolle ekliyoruz)
+    with col_nemi:
+        nemi_val = v.get('nemi', 'N/A')
+        nemi_sev = v.get('nemi_seviye', 'Veri Bekleniyor')
+        st.metric("Toprak Nemi", f"%{nemi_val}" if nemi_val != 'N/A' else nemi_val, nemi_sev)
+
+    with col_ruzgar:
+        ruzgar_val = v.get('ruzgar', 'N/A')
+        ruzgar_sev = v.get('ruzgar_seviye', 'Veri Bekleniyor')
+        st.metric("Rüzgar Riski", f"%{ruzgar_val}" if ruzgar_val != 'N/A' else ruzgar_val, ruzgar_sev, delta_color="inverse")
 
     st.divider()
 
@@ -83,23 +92,62 @@ if data:
 
     for il_adi, skorlar in data.items():
         if il_adi in iller_koordinat:
+            # Don riskine göre dinamik renk
             color = 'darkred' if skorlar['don'] >= 25 else 'orange' if skorlar['don'] >= 15 else 'green'
+            
+            # Popup detaylarını zenginleştiriyoruz
+            popup_html = f"""
+            <div style='font-family: Arial; width: 160px;'>
+                <h4 style='margin-bottom:5px; color:#2E7D32;'>{il_adi}</h4>
+                <hr style='margin:5px 0;'>
+                <b>Don:</b> %{skorlar['don']}<br>
+                <b>Kuraklık:</b> %{skorlar['kuraklik']}<br>
+                <b>Toprak Nemi:</b> %{skorlar.get('nemi', '??')}<br>
+                <b>Rüzgar Riski:</b> %{skorlar.get('ruzgar', '??')}
+            </div>
+            """
+            
             folium.CircleMarker(
                 location=iller_koordinat[il_adi],
-                radius=8,
-                tooltip=il_adi, # Tooltip tıklama takibi için kritiktir
+                radius=10,
+                tooltip=il_adi,
+                popup=folium.Popup(popup_html, max_width=250),
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
-    # Haritayı çalıştır ve tıklanan veriyi yakala
-    map_data = st_folium(m, width="100%", height=500, key="main_map")
+    map_out = st_folium(m, width="100%", height=500, key="ana_harita")
 
-    # --- SENKRONİZASYON TETİKLEYİCİ ---
-    # Eğer haritada bir noktaya tıklandıysa:
-    if map_data["last_object_clicked_tooltip"]:
-        tıklanan_il = map_data["last_object_clicked_tooltip"]
-        if tıklanan_il != st.session_state.secilen_il:
-            st.session_state.secilen_il = tıklanan_il
-            st.rerun() # Sayfayı yeni il bilgisiyle tekrar çalıştır
+    if map_out and map_out.get("last_object_clicked_tooltip"):
+        yeni_il = map_out["last_object_clicked_tooltip"]
+        if yeni_il != st.session_state.secilen_il:
+            st.session_state.secilen_il = yeni_il
+            st.rerun()
+
+    st.divider()
+
+    # --- ALT SEKMELER ---
+    tab_list, tab_don, tab_kurak, tab_proje = st.tabs(["📊 Veri Tablosu", "❄️ Don Analizi", "🌵 Kuraklık Analizi", "📄 Proje Detayı"])
+    
+    with tab_list:
+        df = pd.DataFrame.from_dict(data, orient='index').reset_index()
+        st.dataframe(df, use_container_width=True, hide_index=True)
+
+    with tab_don:
+        if os.path.exists('don_haritasi.png'):
+            st.image('don_haritasi.png', caption="Türkiye Don Risk Heatmap", use_container_width=True)
+
+    with tab_kurak:
+        if os.path.exists('kuraklik_haritasi.png'):
+            st.image('kuraklik_haritasi.png', caption="Türkiye Kuraklık Heatmap", use_container_width=True)
+            
+    with tab_proje:
+        st.info("### 🔬 TÜBİTAK Ar-Ge Çalışması")
+        st.write("""
+        Bu platform, **Lazer Biyostimülasyon** ve **Yapay Zeka** destekli bitki izleme projelerinin 
+        karar destek ayağını oluşturmaktadır. ERA5 atmosferik verileri kullanılarak 81 il için 
+        gerçek zamanlı risk analizi sunar.
+        """)
+else:
+    st.error("tarlaiq_data.json dosyası yüklenemedi. Lütfen GitHub Actions'ın çalışmasını bekleyin.")
