@@ -2,13 +2,13 @@ name: TarlaIQ Daily Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Her gece Türkiye saatiyle 03:00'te otomatik çalışır
-  workflow_dispatch: # Manuel çalıştırma butonu (Test için)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   update_data:
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # Robotun toplamda 30 dakika çalışma izni olsun
+    timeout-minutes: 30
     permissions:
       contents: write
 
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Tüm geçmişi çekerek çakışmaları (conflict) önler
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,33 +27,26 @@ jobs:
         run: |
           pip install pandas xarray numpy cdsapi netCDF4 scipy
 
+      # KRİTİK ADIM: Eski dosyayı robotun önünden kaldırıyoruz
+      - name: Pre-clean old data
+        run: |
+          rm -f tarlaiq_data.json
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
       - name: Run update script
         env:
           CDS_TOKEN: ${{ secrets.CDS_TOKEN }}
-          PYTHONHTTPSVERIFY: "0" # SSL hatalarını bypass eder
+          PYTHONHTTPSVERIFY: "0"
         run: python updater.py
 
       - name: Commit and Push changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          # 1. Yeni oluşan veriyi (rakam dolu olanı) geçici olarak hafızaya al
+          # 1. Yeni oluşan dosyayı ekle
           git add tarlaiq_data.json
-          git stash || echo "Saklanacak yeni veri yok"
           
-          # 2. GitHub'daki ana yapıyı temizle ve eşitle
-          git fetch origin main
-          git reset --hard origin/main
+          # 2. Eğer dosya değişmişse veya yeni oluşmuşsa kaydet
+          git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
           
-          # 3. Kenara aldığımız taze veriyi tekrar üstüne koy
-          git stash pop || echo "Geri yüklenecek veri yok"
-          
-          # 4. Kesin ve zorunlu kayıt (Force Push)
-          if [ -f tarlaiq_data.json ]; then
-            git add tarlaiq_data.json
-            git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-            git push origin main --force
-          else
-            echo "HATA: tarlaiq_data.json dosyası bulunamadı, push yapılamadı."
-          fi
+          # 3. Direkt ana kola (main) zorla gönder
+          git push origin main --force
