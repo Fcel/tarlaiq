@@ -20,12 +20,12 @@ c = cdsapi.Client(
     url=URL, 
     key=TOKEN, 
     verify=False,
-    timeout=1200,     # 20 dakika bekleme süresi
-    retry_max=15      # Daha fazla deneme hakkı
+    timeout=600,      # 10 dakika boyunca sunucuyu bekler (MEŞGUL hatasını önler)
+    retry_max=10      # Sunucu hata verirse 10 kez tekrar dener
 )
 
 # Tarih Ayarı: 7 gün geriye çekiyoruz (En garanti veri aralığı)
-target_date = datetime.now() - timedelta(days=10)
+target_date = datetime.now() - timedelta(days=7)
 current_year = str(target_date.year)
 current_month = target_date.strftime('%m')
 current_day = target_date.strftime('%d')
@@ -70,7 +70,7 @@ def run_process():
             'reanalysis-era5-single-levels',
             {
                 'product_type': 'reanalysis',
-                'variable': ['2m_temperature', 'volumetric_soil_water_layer_1'],
+                'variable': ['2m_temperature', 'total_precipitation', 'volumetric_soil_water_layer_1', '10m_wind_speed'],
                 'year': [current_year],
                 'month': [current_month],
                 'day': [current_day],
