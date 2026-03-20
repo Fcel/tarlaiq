@@ -25,7 +25,6 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # 404 hatasını önlemek için kütüphaneyi en sona zorluyoruz
           pip install --upgrade cdsapi
           pip install pandas xarray numpy netCDF4 scipy
 
@@ -45,5 +44,7 @@ jobs:
           if [ -f tarlaiq_data.json ]; then
             git add tarlaiq_data.json
             git commit -m "Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-            git push origin main --force
+            # Önce GitHub'daki son hali al, sonra kendi verini ekle ve gönder
+            git pull --rebase origin main
+            git push origin main
           fi
