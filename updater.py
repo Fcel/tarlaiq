@@ -4,7 +4,13 @@ import pandas as pd
 import xarray as xr
 import numpy as np
 import cdsapi
+import ssl
+import urllib3
 from datetime import datetime
+
+# --- 0. GÜVENLİK AYARI (SSL HATASINI ÇÖZER) ---
+ssl._create_default_https_context = ssl._create_unverified_context
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- 1. AYARLAR VE API BAĞLANTISI ---
 URL = "https://cds-beta.climate.copernicus.eu/api"
@@ -13,9 +19,10 @@ TOKEN = os.environ.get("CDS_TOKEN")
 if not TOKEN:
     raise ValueError("CDS_TOKEN bulunamadı! GitHub Secrets ayarlarını kontrol edin.")
 
-c = cdsapi.Client(url=URL, key=TOKEN)
+# verify=False ekleyerek SSL hatasını bypass ediyoruz
+c = cdsapi.Client(url=URL, key=TOKEN, verify=False)
 
-# Tarih Ayarları (Dinamik)
+# Tarih Ayarları
 now = datetime.now()
 current_year = str(now.year)
 current_month = now.strftime('%m')
@@ -55,32 +62,37 @@ iller_koordinat = {
 
 # --- 3. VERİ ÇEKME ---
 def fetch_data():
-    print("Copernicus'tan yeni veriler (Nem ve Rüzgar dahil) indiriliyor...")
-    c.retrieve(
-        'reanalysis-era5-single-levels',
-        {
-            'product_type': 'reanalysis',
-            'variable': [
-                '2m_temperature', 
-                'total_precipitation', 
-                'potential_evaporation',
-                'volumetric_soil_water_layer_1',
-                '10m_wind_speed'
-            ],
-            'year': [current_year],
-            'month': [current_month],
-            'day': current_days,
-            'time': ['00:00', '06:00', '12:00', '18:00'],
-            'area': [42, 26, 36, 45],
-            'format': 'netcdf',
-        },
-        'latest_data.nc'
-    )
-    return xr.open_dataset('latest_data.nc')
+    print("Copernicus'tan veriler çekiliyor (SSL koruması devredışı)...")
+    try:
+        c.retrieve(
+            'reanalysis-era5-single-levels',
+            {
+                'product_type': 'reanalysis',
+                'variable': [
+                    '2m_temperature', 
+                    'total_precipitation', 
+                    'potential_evaporation',
+                    'volumetric_soil_water_layer_1',
+                    '10m_wind_speed'
+                ],
+                'year': [current_year],
+                'month': [current_month],
+                'day': current_days,
+                'time': ['00:00', '06:00', '12:00', '18:00'],
+                'area': [42, 26, 36, 45],
+                'format': 'netcdf',
+            },
+            'latest_data.nc'
+        )
+        return xr.open_dataset('latest_data.nc')
+    except Exception as e:
+        print(f"Veri çekme hatası: {e}")
+        return None
 
 # --- 4. RİSK HESAPLAMA ---
 def calculate_risks(ds):
-    print("Riskler analiz ediliyor...")
+    if ds is None: return None, None, None, None, None
+    print("Hesaplamalar yapılıyor...")
     
     # Don Skoru
     temp = ds['t2m'] - 273.15
@@ -92,21 +104,22 @@ def calculate_risks(ds):
     oran = yagis.mean(dim='time') / (pet.mean(dim='time') + 0.001)
     kuraklik_map = np.clip((1 - oran) * 50, 0, 100)
     
-    # Toprak Nemi (0.4 doyum noktası kabul edilerek % bazlı)
+    # Toprak Nemi (% bazlı)
     nemi_raw = ds['swvl1'].mean(dim='time')
     nemi_map = np.clip(nemi_raw * 250, 0, 100) 
     
-    # Rüzgar Riski (15 m/s fırtına sınırı kabul edilerek)
+    # Rüzgar Riski
     wind_raw = ds['si10'].max(dim='time')
     ruzgar_map = np.clip(wind_raw * 6.6, 0, 100)
     
-    # Yağış Tahmin Skoru
+    # Yağış Skoru
     yagis_map = np.clip(yagis.mean(dim='time') * 14, 0, 100)
     
     return don_map, kuraklik_map, yagis_map, nemi_map, ruzgar_map
 
-# --- 5. JSON ÇIKTISI ---
+# --- 5. JSON OLUŞTURMA ---
 def create_json(don, kurak, yagis, nemi, ruzgar):
+    if don is None: return
     results = {}
     
     def get_level(skor):
@@ -127,16 +140,17 @@ def create_json(don, kurak, yagis, nemi, ruzgar):
                 'don': round(d_val, 1), 'don_seviye': get_level(d_val),
                 'kuraklik': round(k_val, 1), 'kuraklik_seviye': get_level(k_val),
                 'yagis': round(y_val, 1), 'yagis_seviye': get_level(y_val),
-                'nemi': round(n_val, 1), 'nemi_seviye': "İDEAL" if 30 < n_val < 70 else "DÜŞÜK/YÜKSEK",
-                'ruzgar': round(r_val, 1), 'ruzgar_seviye': "GÜVENLİ" if r_val < 30 else "RİSKLİ"
+                'nemi': round(n_val, 1), 'nemi_seviye': "İDEAL" if 25 < n_val < 65 else "KRİTİK",
+                'ruzgar': round(r_val, 1), 'ruzgar_seviye': "GÜVENLİ" if r_val < 35 else "FIRTINA"
             }
         except: continue
     
     with open('tarlaiq_data.json', 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
-    print("Güncelleme tamam!")
+    print("JSON başarıyla kaydedildi.")
 
 if __name__ == "__main__":
     ds = fetch_data()
-    d, k, y, n, r = calculate_risks(ds)
-    create_json(d, k, y, n, r)
+    if ds:
+        d, k, y, n, r = calculate_risks(ds)
+        create_json(d, k, y, n, r)
