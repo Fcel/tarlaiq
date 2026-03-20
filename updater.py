@@ -20,8 +20,8 @@ c = cdsapi.Client(
     url=URL, 
     key=TOKEN, 
     verify=False,
-    timeout=600,      # 10 dakika boyunca sunucuyu bekler (MEŞGUL hatasını önler)
-    retry_max=10      # Sunucu hata verirse 10 kez tekrar dener
+    timeout=1200,     # 20 dakika bekleme süresi
+    retry_max=15      # Daha fazla deneme hakkı
 )
 
 # Tarih Ayarı: 7 gün geriye çekiyoruz (En garanti veri aralığı)
