@@ -70,7 +70,7 @@ def run_process():
             'reanalysis-era5-single-levels',
             {
                 'product_type': 'reanalysis',
-                'variable': ['2m_temperature', 'total_precipitation', 'volumetric_soil_water_layer_1', '10m_wind_speed'],
+                'variable': ['2m_temperature', 'volumetric_soil_water_layer_1'],
                 'year': [current_year],
                 'month': [current_month],
                 'day': [current_day],
