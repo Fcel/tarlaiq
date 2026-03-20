@@ -2,24 +2,30 @@ name: TarlaIQ Daily Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Her gece Türkiye saatiyle 03:00'te çalışır
-  workflow_dispatch: # Manuel çalıştırma butonu ekler
+    - cron: '0 0 * * *' # Her gece Türkiye saatiyle 03:00'te otomatik çalışır
+  workflow_dispatch: # Manuel çalıştırma butonu (Test için)
 
 jobs:
   update_data:
     runs-on: ubuntu-latest
+    # Dosya yazma izni için gerekli olan kritik ayar
+    permissions:
+      contents: write
+      
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Tüm geçmişi çekerek çakışmaları önler
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
       - name: Install dependencies
         run: |
-          pip install pandas xarray numpy cdsapi netCDF4
+          pip install pandas xarray numpy cdsapi netCDF4 scipy
 
       - name: Run update script
         env:
@@ -30,6 +36,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          # Çakışmaları önlemek için önce senin değişikliklerini çekip üzerine yazar
+          git pull origin main --rebase
           git add tarlaiq_data.json
-          git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok"
-          git push
+          # Eğer veri değişmediyse hata vermeden devam etmesini sağlar
+          git commit -m "Otomatik Veri Güncelleme: $(date)" || echo "Değişiklik yok, devam ediliyor."
+          git push origin main
