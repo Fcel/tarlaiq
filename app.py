@@ -8,7 +8,7 @@ from streamlit_folium import st_folium
 # --- SAYFA AYARLARI ---
 st.set_page_config(page_title="TarlaIQ | Dr. Fatih", page_icon="🌱", layout="wide")
 
-# --- KOORDİNAT VERİTABANI (Gömülü) ---
+# --- KOORDİNAT VERİTABANI ---
 iller_koordinat = {
     'Adana': (37.0, 35.3), 'Adıyaman': (37.7, 38.2), 'Afyonkarahisar': (38.7, 30.5),
     'Ağrı': (39.7, 43.0), 'Amasya': (40.6, 35.8), 'Ankara': (39.9, 32.8),
@@ -39,7 +39,6 @@ iller_koordinat = {
     'Kilis': (36.7, 37.1), 'Osmaniye': (37.1, 36.2), 'Düzce': (40.8, 31.2),
 }
 
-# --- VERİ YÜKLEME ---
 @st.cache_data
 def load_data():
     if os.path.exists('tarlaiq_data.json'):
@@ -49,21 +48,26 @@ def load_data():
 
 data = load_data()
 
-# --- ARAYÜZ ---
-st.title("🌱 TarlaIQ: İnteraktif Tarımsal Risk Analizi")
-st.markdown("### Dr. Fatih Celik | Karar Destek Sistemi")
+# --- SENKRONİZASYON MANTIĞI ---
+# Eğer hafızada (session_state) seçili bir il yoksa varsayılanı ata
+if 'secilen_il' not in st.session_state:
+    st.session_state.secilen_il = "Gümüşhane"
+
+st.title("🌱 TarlaIQ: Senkronize Risk Analizi")
 
 if data:
     iller = sorted(list(data.keys()))
-    
-    # Üst Bölüm: Metrikler
+
+    # --- ÜST PANEL (METRİKLER) ---
     col_secim, col_don, col_kurak, col_yagis = st.columns([1.5, 1, 1, 1])
     
     with col_secim:
+        # Selectbox, session_state'deki il bilgisini kullanır
         secilen_il = st.selectbox("📍 İl seçiniz:", iller, 
-                                  index=iller.index("Gümüşhane") if "Gümüşhane" in iller else 0)
-    
-    v = data[secilen_il]
+                                  index=iller.index(st.session_state.secilen_il))
+        st.session_state.secilen_il = secilen_il
+
+    v = data[st.session_state.secilen_il]
     
     with col_don:
         st.metric("Don Riski", f"%{v['don']}", v['don_seviye'], delta_color="inverse")
@@ -75,60 +79,27 @@ if data:
     st.divider()
 
     # --- İNTERAKTİF HARİTA ---
-    st.subheader("🗺️ Türkiye Tarımsal Risk Haritası")
-    
-    # Haritayı oluştur (Türkiye merkezli)
     m = folium.Map(location=[39.0, 35.5], zoom_start=6, tiles="CartoDB positron")
 
     for il_adi, skorlar in data.items():
         if il_adi in iller_koordinat:
-            coords = iller_koordinat[il_adi]
-            
-            # Don riskine göre renk belirleme
-            if skorlar['don'] >= 25: color = 'darkred'
-            elif skorlar['don'] >= 15: color = 'orange'
-            else: color = 'green'
-            
-            # Popup İçeriği
-            popup_text = f"""
-            <div style='font-family: Arial; width: 150px;'>
-                <h4 style='margin-bottom:5px;'>{il_adi}</h4>
-                <hr style='margin:5px 0;'>
-                <b>Don:</b> %{skorlar['don']}<br>
-                <b>Kuraklık:</b> %{skorlar['kuraklik']}<br>
-                <b>Yağış:</b> {skorlar['yagis']}
-            </div>
-            """
-            
+            color = 'darkred' if skorlar['don'] >= 25 else 'orange' if skorlar['don'] >= 15 else 'green'
             folium.CircleMarker(
-                location=coords,
-                radius=7,
-                popup=folium.Popup(popup_text, max_width=200),
-                tooltip=il_adi,
+                location=iller_koordinat[il_adi],
+                radius=8,
+                tooltip=il_adi, # Tooltip tıklama takibi için kritiktir
                 color=color,
                 fill=True,
                 fill_opacity=0.7
             ).add_to(m)
 
-    # Haritayı ekrana bas
-    st_folium(m, width="100%", height=500)
+    # Haritayı çalıştır ve tıklanan veriyi yakala
+    map_data = st_folium(m, width="100%", height=500, key="main_map")
 
-    # --- TABLOLAR VE DİĞER HARİTALAR ---
-    st.divider()
-    tab_list, tab_don, tab_kurak = st.tabs(["📊 Veri Tablosu", "❄️ Don Heatmap", "🌵 Kuraklık Heatmap"])
-    
-    with tab_list:
-        df = pd.DataFrame.from_dict(data, orient='index').reset_index()
-        df.columns = ['İl', 'Don Skoru', 'Don Seviyesi', 'Kuraklık Skoru', 'Kuraklık Seviyesi', 'Yağış Skoru', 'Yağış Seviyesi']
-        st.dataframe(df.sort_values('Don Skoru', ascending=False), use_container_width=True, hide_index=True)
-
-    with tab_don:
-        if os.path.exists('don_haritasi.png'):
-            st.image('don_haritasi.png', caption="Statik Don Risk Analizi", use_container_width=True)
-
-    with tab_kurak:
-        if os.path.exists('kuraklik_haritasi.png'):
-            st.image('kuraklik_haritasi.png', caption="Statik Kuraklık Analizi", use_container_width=True)
-
-else:
-    st.error("Veri bulunamadı. Lütfen JSON dosyasını kontrol edin.")
+    # --- SENKRONİZASYON TETİKLEYİCİ ---
+    # Eğer haritada bir noktaya tıklandıysa:
+    if map_data["last_object_clicked_tooltip"]:
+        tıklanan_il = map_data["last_object_clicked_tooltip"]
+        if tıklanan_il != st.session_state.secilen_il:
+            st.session_state.secilen_il = tıklanan_il
+            st.rerun() # Sayfayı yeni il bilgisiyle tekrar çalıştır
